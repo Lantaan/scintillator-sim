@@ -332,6 +332,29 @@ Fix:
 
 The script intentionally aborts if `SSH_CONNECTION`/`SSH_TTY` is set.
 
+## 10.2 Batch Launch (No UI, CSVs in data/)
+
+Use the batch helper script:
+
+```bash
+cd /mnt/d/scintillator-sim
+./scripts/run_batch.sh
+```
+
+With explicit macro:
+
+```bash
+./scripts/run_batch.sh 1.mac
+./scripts/run_batch.sh /absolute/path/to/your_macro.mac
+```
+
+Behavior:
+
+- runs `OpNovice2` in batch mode by passing a macro argument
+- if no macro is provided, defaults to `1gamma.mac`
+- creates/uses `/mnt/d/scintillator-sim/data`
+- executes from `data/`, so generated `results_*.csv` are written there
+
 ## 12. Maintenance and Rebuild Tips
 
 ### Rebuild app only

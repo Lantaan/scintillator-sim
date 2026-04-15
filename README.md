@@ -10,6 +10,10 @@ Local UI launch (WSLg/native Linux desktop):
 
 - `./scripts/run_ui_local.sh`
 
+Batch launch (no UI, writes CSVs to `data/`):
+
+- `./scripts/run_batch.sh [optional_macro_path]`
+
 Quick notes (original instructions) are kept below.
 
 Tested on WSL Ubuntu 24.04.
