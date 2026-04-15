@@ -7,12 +7,14 @@ For a complete, reproducible, end-to-end guide (including troubleshooting and ve
 - [`docs/SETUP_WSL_GEANT4_10_7_2.md`](docs/SETUP_WSL_GEANT4_10_7_2.md)
 
 Local UI launch (WSLg/native Linux desktop):
+```bash
+./scripts/run_ui_local.sh
+```
 
-- `./scripts/run_ui_local.sh`
-
-Batch launch (no UI, writes CSVs to `data/`):
-
-- `./scripts/run_batch.sh [optional_macro_path]`
+Batch launch (no UI, writes CSVs to `data/`, can be used via ssh):
+```bash
+./scripts/run_batch.sh [optional_macro_path]
+```
 
 Note that you may have to add permissions to execute the scripts:
 
