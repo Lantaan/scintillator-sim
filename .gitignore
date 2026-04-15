@@ -1,0 +1,39 @@
+# IDE/editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# CMake/build artifacts
+build/
+app-build/
+app-install/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+Makefile
+compile_commands.json
+CTestTestfile.cmake
+Testing/
+
+# Common binary/object outputs
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+*.a
+*.lib
+*.exe
+
+# Local Geant4 source/build/install artifacts (if created in repo root)
+geant4.10.07.p02/
+geant-build/
+geant-install/
+geant4.10.07.p02.tar.gz
