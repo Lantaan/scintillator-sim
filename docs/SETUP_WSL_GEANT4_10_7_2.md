@@ -1,5 +1,11 @@
 # Complete Setup Guide: Geant4 10.07.p02 on WSL Ubuntu 24.04
 
+# TLDR
+Run `scripts/setup_wsl_geant4.sh`. Make sure you have Geant4 installed (most reliably version 10.07.p02), and the script has permission to be executed.
+
+# Full Guide
+Everything beyond this line is LLM generated, and is probably best parsed by one.
+
 This document is a full, reproducible walkthrough for setting up this project on:
 
 - Windows host
