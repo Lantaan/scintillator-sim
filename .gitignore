@@ -37,3 +37,6 @@ geant4.10.07.p02/
 geant-build/
 geant-install/
 geant4.10.07.p02.tar.gz
+
+# Data files
+*.csv

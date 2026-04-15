@@ -34,7 +34,22 @@ file(GLOB macros ${PROJECT_SOURCE_DIR}/*.mac)
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(OpNovice2 OpNovice2.cc ${sources} ${headers} include/DetectorMaterials.hh)
-target_link_libraries(OpNovice2 ${Geant4_LIBRARIES} )
+# Work around broken libG4visQt3D builds on some environments (WSL/driver/toolchain
+# combinations) while keeping Qt/OpenGL UI support.
+set(OPNOVICE2_GEANT4_LIBRARIES "")
+foreach(_g4lib ${Geant4_LIBRARIES})
+  if(NOT _g4lib MATCHES "G4visQt3D")
+    list(APPEND OPNOVICE2_GEANT4_LIBRARIES ${_g4lib})
+  endif()
+endforeach()
+target_link_libraries(OpNovice2 ${OPNOVICE2_GEANT4_LIBRARIES})
+
+# Geant4 10.7 can advertise Qt3D through compile definitions even when the
+# runtime/library is unusable on some systems. Undefine it for this target so
+# G4VisExecutive does not reference G4Qt3D symbols.
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(OpNovice2 PRIVATE -UG4VIS_USE_QT3D)
+endif()
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we

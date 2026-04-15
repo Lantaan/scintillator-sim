@@ -6,6 +6,10 @@ For a complete, reproducible, end-to-end guide (including troubleshooting and ve
 
 - [`docs/SETUP_WSL_GEANT4_10_7_2.md`](docs/SETUP_WSL_GEANT4_10_7_2.md)
 
+Local UI launch (WSLg/native Linux desktop):
+
+- `./scripts/run_ui_local.sh`
+
 Quick notes (original instructions) are kept below.
 
 Tested on WSL Ubuntu 24.04.

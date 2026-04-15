@@ -41,7 +41,16 @@ chmod +x scripts/setup_wsl_geant4.sh
 Useful options:
 
 - `--jobs 8` to speed up builds
-- `--with-qt` to try a Qt-enabled Geant4 build first
+- `--with-qt` to force Qt-enabled build (default behavior)
+- `--without-qt` for headless/minimal environments
+
+Compatibility notes:
+
+- Works as-is on WSL Ubuntu and native Ubuntu/Debian Linux.
+- On non-Debian distributions (Fedora/Arch/etc.), use the script without `--install-deps`, install equivalent packages manually, and then run the script.
+- The EXPAT cache repair currently uses Debian/Ubuntu path:
+  - `/usr/lib/x86_64-linux-gnu/libexpat.so.1`
+- On other layouts/architectures, update that EXPAT path in `scripts/setup_wsl_geant4.sh`.
 
 ## 2. Known Working Layout
 
@@ -224,6 +233,28 @@ Interactive mode:
 ./app-install/bin/OpNovice2
 ```
 
+## 10.1 Local UI Launch (Recommended)
+
+Use the local UI helper script (works on WSLg and native Linux desktop sessions):
+
+```bash
+cd /mnt/d/scintillator-sim
+./scripts/run_ui_local.sh
+```
+
+What it does:
+
+- sources `~/geant-install/bin/geant4.sh`
+- ensures this is a local desktop session (fails fast on SSH)
+- checks that GUI display variables exist
+- builds app if missing
+- starts interactive UI from `app-build`
+
+Expected result:
+
+- OpenGL window opens
+- terminal reaches Geant4 prompt `Idle>`
+
 ## 11. Troubleshooting
 
 ### A. Patch hunk failure in MixMaxRng.h
@@ -282,6 +313,24 @@ Fix:
 
 - Run commands from an elevated terminal / ensure WSL service permissions are available.
 - If using an automation/sandbox tool, execute WSL commands with elevated permissions.
+
+### E. UI over SSH fails or no render
+
+Symptom:
+
+- UI starts but no image/window appears
+- remote rendering errors
+
+Fix:
+
+- Use local WSLg/native desktop session, not SSH session.
+- Run via:
+
+```bash
+./scripts/run_ui_local.sh
+```
+
+The script intentionally aborts if `SSH_CONNECTION`/`SSH_TTY` is set.
 
 ## 12. Maintenance and Rebuild Tips
 

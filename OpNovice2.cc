@@ -54,6 +54,7 @@
 #include "G4VisExecutive.hh"
 #include "G4UIExecutive.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4ios.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....
 
@@ -100,7 +101,12 @@ int main(int argc, char** argv)
 
   if (ui)  {
     //interactive mode
-    UImanager->ApplyCommand("/control/execute ../OpNovice2.in");
+    // Prefer OpNovice2.in (UI profile), but fall back to legacy OpNovice.in.
+    G4int uiInitStatus = UImanager->ApplyCommand("/control/execute ../OpNovice2.in");
+    if (uiInitStatus != 0) {
+      G4cout << "[OpNovice2] ../OpNovice2.in not found or failed. Falling back to ../OpNovice.in" << G4endl;
+      UImanager->ApplyCommand("/control/execute ../OpNovice.in");
+    }
 
     UImanager->ApplyCommand("/control/execute vis.mac");
     ui->SessionStart();

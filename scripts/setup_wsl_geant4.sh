@@ -26,7 +26,7 @@ JOBS="${JOBS:-$(nproc 2>/dev/null || echo 4)}"
 
 INSTALL_DEPS=0
 FORCE_CLEAN=0
-WITH_QT=0
+WITH_QT=1
 
 usage() {
   cat <<EOF
@@ -35,13 +35,21 @@ Usage: $(basename "$0") [options]
 Options:
   --install-deps   Install required apt dependencies
   --force-clean    Remove existing Geant4 source/build/install and app build/install
-  --with-qt        Try Geant4 build with Qt enabled (default: off for resilience)
+  --with-qt        Build Geant4 with Qt enabled (default)
+  --without-qt     Build Geant4 without Qt UI support
   -j, --jobs N     Parallel build jobs (default: ${JOBS})
   -h, --help       Show this help
+
+Compatibility:
+  - Works as-is on WSL Ubuntu and native Ubuntu/Debian Linux.
+  - On non-Debian distros, run without --install-deps and install equivalents manually.
+  - EXPAT cache fix currently uses Debian/Ubuntu path:
+      /usr/lib/x86_64-linux-gnu/libexpat.so.1
 
 Examples:
   $(basename "$0") --install-deps --force-clean
   $(basename "$0") --jobs 8
+  $(basename "$0") --without-qt
 EOF
 }
 
@@ -57,6 +65,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --with-qt)
       WITH_QT=1
+      shift
+      ;;
+    --without-qt)
+      WITH_QT=0
       shift
       ;;
     -j|--jobs)
@@ -84,7 +96,8 @@ if [[ "${INSTALL_DEPS}" -eq 1 ]]; then
     dpkg-dev cmake g++ gcc binutils make \
     libx11-dev libxpm-dev libxft-dev libxext-dev libxmu-dev \
     python3 libxerces-c-dev qtbase5-dev \
-    expat libexpat1-dev
+    expat libexpat1-dev \
+    xfonts-base xfonts-75dpi xfonts-100dpi
 fi
 
 if [[ "${FORCE_CLEAN}" -eq 1 ]]; then
