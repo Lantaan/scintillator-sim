@@ -32,6 +32,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #include <ActionInitialization.hh>
+#include <algorithm>
 #include "DetectorConstruction.hh"
 #include "DetectorMessenger.hh"
 #include "DetectorMaterials.hh"
@@ -48,6 +49,49 @@
 #include "G4ThreeVector.hh"
 #include "G4PVPlacement.hh"
 #include "G4VisAttributes.hh"
+#include "G4Version.hh"
+
+namespace {
+  void SetSplineIfSupported(G4MaterialPropertyVector *mpv) {
+#if G4VERSION_NUMBER < 1100
+    if (mpv != nullptr) {
+      mpv->SetSpline(true);
+    }
+#else
+    (void) mpv;
+#endif
+  }
+
+  G4MaterialPropertyVector *AddPropertyWithSpline(G4MaterialPropertiesTable *table,
+                                                  const char *key,
+                                                  G4double *energies,
+                                                  G4double *values,
+                                                  G4int count) {
+#if G4VERSION_NUMBER >= 1100
+    return table->AddProperty(key, energies, values, count, false, true);
+#else
+    auto *mpv = table->AddProperty(key, energies, values, count);
+    SetSplineIfSupported(mpv);
+    return mpv;
+#endif
+  }
+
+  const char *ScintillationComponentKey() {
+#if G4VERSION_NUMBER >= 1100
+    return "SCINTILLATIONCOMPONENT1";
+#else
+    return "FASTCOMPONENT";
+#endif
+  }
+
+  const char *ScintillationTimeConstantKey() {
+#if G4VERSION_NUMBER >= 1100
+    return "SCINTILLATIONTIMECONSTANT1";
+#else
+    return "FASTTIMECONSTANT";
+#endif
+  }
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -448,7 +492,7 @@ void DetectorConstruction::ChangeNumberOfSiPM(G4int v) {
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void DetectorConstruction::AddBoxMPV(const char* c,
                                      G4MaterialPropertyVector* mpv) {
-  mpv->SetSpline(true);
+  SetSplineIfSupported(mpv);
   fBoxMPT->AddProperty(c, mpv);
   G4cout << "The MPT for the box is now: " << G4endl;
   fBoxMPT->DumpTable();
@@ -458,7 +502,7 @@ void DetectorConstruction::AddBoxMPV(const char* c,
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void DetectorConstruction::AddWorldMPV(const char* c,
                                        G4MaterialPropertyVector* mpv) {
-  mpv->SetSpline(true);
+  SetSplineIfSupported(mpv);
   fWorldMPT->AddProperty(c, mpv);
   G4cout << "The MPT for the world is now: " << G4endl;
   fWorldMPT->DumpTable();
@@ -468,7 +512,7 @@ void DetectorConstruction::AddWorldMPV(const char* c,
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void DetectorConstruction::AddSurfaceMPV(const char* c,
                                          G4MaterialPropertyVector* mpv) {
-  mpv->SetSpline(true);
+  SetSplineIfSupported(mpv);
   fSurfaceMPT->AddProperty(c, mpv);
   G4cout << "The MPT for the surface is now: " << G4endl;
   fSurfaceMPT->DumpTable();
@@ -531,17 +575,21 @@ void DetectorConstruction::DefineOpticalProperties(G4int ScintillatorMaterial) {
   // Add scintillator optical properties
   if (ScintillatorMaterial==0) {
     // Add CeBr3 optical properties
-    fScintillatorMPT->AddProperty("FASTCOMPONENT", PhotonEnergyCeBr3, FastCompCeBr3, nEntries)->SetSpline(true);
+    AddPropertyWithSpline(fScintillatorMPT, ScintillationComponentKey(), PhotonEnergyCeBr3, FastCompCeBr3, nEntries);
     fScintillatorMPT->AddProperty("RINDEX", PhotonEnergyCeBr3, rIndexCeBr3, nEntries);
-    fScintillatorMPT->AddProperty("ABSLENGTH", PhotonEnergyCeBr3, AbsorptionCeBr3, nEntries)->SetSpline(true);
+    AddPropertyWithSpline(fScintillatorMPT, "ABSLENGTH", PhotonEnergyCeBr3, AbsorptionCeBr3, nEntries);
 
     fScintillatorMPT->AddConstProperty("SCINTILLATIONYIELD", 60. / keV);
     fScintillatorMPT->AddConstProperty("RESOLUTIONSCALE", 1.0);
-    fScintillatorMPT->AddConstProperty("FASTTIMECONSTANT", 18.0 * ns);
+    fScintillatorMPT->AddConstProperty(ScintillationTimeConstantKey(), 18.0 * ns);
+#if G4VERSION_NUMBER >= 1100
+    fScintillatorMPT->AddConstProperty("SCINTILLATIONYIELD1", 1.0);
+#else
     fScintillatorMPT->AddConstProperty("YIELDRATIO", 1.0);
+#endif
 
     // Add reflector optical properties
-    fReflectorMPT->AddProperty("RINDEX", PhotonEnergyCeBr3, rIndex_ref, nEntries)->SetSpline(true);
+    AddPropertyWithSpline(fReflectorMPT, "RINDEX", PhotonEnergyCeBr3, rIndex_ref, nEntries);
 
 // To be add:
 //    fScintillatorMPT->AddProperty("WLSABSLENGTH",PhotonEnergyCeBr3,AbsFiber,nEntries);
@@ -549,33 +597,41 @@ void DetectorConstruction::DefineOpticalProperties(G4int ScintillatorMaterial) {
   }
   else if (ScintillatorMaterial==1) {
     // Add CsI(Tl) optical properties
-    fScintillatorMPT->AddProperty("FASTCOMPONENT", PhotonEnergyCsI, FastCompCsI, nEntries)->SetSpline(true);
+    AddPropertyWithSpline(fScintillatorMPT, ScintillationComponentKey(), PhotonEnergyCsI, FastCompCsI, nEntries);
     fScintillatorMPT->AddProperty("RINDEX", PhotonEnergyCsI, rIndexCsI, nEntries);
-    fScintillatorMPT->AddProperty("ABSLENGTH", PhotonEnergyCsI, AbsorptionCsI, nEntries)->SetSpline(true);
+    AddPropertyWithSpline(fScintillatorMPT, "ABSLENGTH", PhotonEnergyCsI, AbsorptionCsI, nEntries);
 
     fScintillatorMPT->AddConstProperty("SCINTILLATIONYIELD", 54 / keV);
     fScintillatorMPT->AddConstProperty("RESOLUTIONSCALE", 1.0);
-    fScintillatorMPT->AddConstProperty("FASTTIMECONSTANT", 0.6 * us);
+    fScintillatorMPT->AddConstProperty(ScintillationTimeConstantKey(), 0.6 * us);
     // fScintillatorMPT->AddConstProperty("SLOWTIMECONSTANT", 3.5 * mus);
+#if G4VERSION_NUMBER >= 1100
+    fScintillatorMPT->AddConstProperty("SCINTILLATIONYIELD1", 1.0);
+#else
     fScintillatorMPT->AddConstProperty("YIELDRATIO", 1.0);
+#endif
 
     // Add reflector optical properties
-    fReflectorMPT->AddProperty("RINDEX", PhotonEnergyCsI, rIndex_ref, nEntries)->SetSpline(true);
+    AddPropertyWithSpline(fReflectorMPT, "RINDEX", PhotonEnergyCsI, rIndex_ref, nEntries);
 
   }
   else if (ScintillatorMaterial==2) {
     // Add NaI(Tl) optical properties
-    fScintillatorMPT->AddProperty("FASTCOMPONENT", PhotonEnergyNaI, FastCompNaI, nEntries)->SetSpline(true);
+    AddPropertyWithSpline(fScintillatorMPT, ScintillationComponentKey(), PhotonEnergyNaI, FastCompNaI, nEntries);
     fScintillatorMPT->AddProperty("RINDEX", PhotonEnergyNaI, rIndexNaI, nEntries);
-    fScintillatorMPT->AddProperty("ABSLENGTH", PhotonEnergyNaI, AbsorptionNaI, nEntries)->SetSpline(true);
+    AddPropertyWithSpline(fScintillatorMPT, "ABSLENGTH", PhotonEnergyNaI, AbsorptionNaI, nEntries);
 
     fScintillatorMPT->AddConstProperty("SCINTILLATIONYIELD", 38 / keV);
     fScintillatorMPT->AddConstProperty("RESOLUTIONSCALE", 1.0);
-    fScintillatorMPT->AddConstProperty("FASTTIMECONSTANT", 250.0 * ns);
+    fScintillatorMPT->AddConstProperty(ScintillationTimeConstantKey(), 250.0 * ns);
+#if G4VERSION_NUMBER >= 1100
+    fScintillatorMPT->AddConstProperty("SCINTILLATIONYIELD1", 1.0);
+#else
     fScintillatorMPT->AddConstProperty("YIELDRATIO", 1.0);
+#endif
 
     // Add reflector optical properties
-    fReflectorMPT->AddProperty("RINDEX", PhotonEnergyNaI, rIndex_ref, nEntries)->SetSpline(true);
+    AddPropertyWithSpline(fReflectorMPT, "RINDEX", PhotonEnergyNaI, rIndex_ref, nEntries);
 
   }
 
@@ -596,15 +652,19 @@ void DetectorConstruction::DefineOpticalProperties(G4int ScintillatorMaterial) {
 
 
 // Add World optical properties
-  fWorldMPT->AddConstProperty("ABSLENGTH",1 *m);
+  G4double worldAbs[nEntries];
+  std::fill_n(worldAbs, nEntries, 1 * m);
   if (ScintillatorMaterial==0) {
     fWorldMPT->AddProperty("RINDEX", PhotonEnergyCeBr3, rIndex_air, nEntries);
+    fWorldMPT->AddProperty("ABSLENGTH", PhotonEnergyCeBr3, worldAbs, nEntries);
   }
   else if (ScintillatorMaterial==1) {
     fWorldMPT->AddProperty("RINDEX", PhotonEnergyCsI, rIndex_air, nEntries);
+    fWorldMPT->AddProperty("ABSLENGTH", PhotonEnergyCsI, worldAbs, nEntries);
   }
   else if (ScintillatorMaterial==2) {
     fWorldMPT->AddProperty("RINDEX", PhotonEnergyNaI, rIndex_air, nEntries);
+    fWorldMPT->AddProperty("ABSLENGTH", PhotonEnergyNaI, worldAbs, nEntries);
   }
 
   // ------------ Generate & Add Material Properties Table ------------

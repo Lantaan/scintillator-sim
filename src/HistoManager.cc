@@ -47,7 +47,9 @@ HistoManager::HistoManager()
 
 HistoManager::~HistoManager()
 {
-  delete G4AnalysisManager::Instance();
+  // Geant4 11.x manages analysis-manager lifetime differently across MT/serial
+  // execution paths; explicit deletion here can trigger shutdown crashes.
+  (void)G4AnalysisManager::Instance();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

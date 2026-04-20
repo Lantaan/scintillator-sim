@@ -46,6 +46,30 @@
 #include "G4UIcmdWithAnInteger.hh"
 #include "G4UIcmdWithADoubleAndUnit.hh"
 #include "G4UIcmdWithoutParameter.hh"
+#include "G4Version.hh"
+
+namespace {
+void SetSplineIfSupported(G4MaterialPropertyVector* mpv) {
+#if G4VERSION_NUMBER < 1100
+  if (mpv != nullptr) {
+    mpv->SetSpline(true);
+  }
+#else
+  (void)mpv;
+#endif
+}
+
+G4MaterialPropertyVector* CreateMaterialPropertyVectorWithSpline()
+{
+#if G4VERSION_NUMBER >= 1100
+  return new G4MaterialPropertyVector(true);
+#else
+  auto* mpv = new G4MaterialPropertyVector();
+  SetSplineIfSupported(mpv);
+  return mpv;
+#endif
+}
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -451,8 +475,7 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
     // string format is property name, then pairs of energy, value  
     // specify units for each value, eg 3.0*eV
     // space delimited
-    auto * mpv = new G4MaterialPropertyVector();
-    mpv->SetSpline(true);
+    auto * mpv = CreateMaterialPropertyVectorWithSpline();
     std::istringstream instring(newValue);
     G4String prop;
     instring >> prop;

@@ -23,22 +23,30 @@ fi
 [[ -f "${GEANT4_SH}" ]] || die "Missing Geant4 environment script: ${GEANT4_SH}"
 source "${GEANT4_SH}"
 
+find_geant4_cmake_dir() {
+  local config_file
+  config_file="$(find "${HOME}/geant-install" -type f -name Geant4Config.cmake | head -n1 || true)"
+  [[ -n "${config_file}" ]] || die "Could not locate Geant4Config.cmake under ${HOME}/geant-install"
+  dirname "${config_file}"
+}
+
 if [[ -z "${DISPLAY:-}" && -z "${WAYLAND_DISPLAY:-}" ]]; then
   die "No GUI display detected (DISPLAY/WAYLAND_DISPLAY unset). Start from local desktop/WSLg session."
 fi
 
 if ! geant4-config --has-feature qt >/dev/null 2>&1 || [[ "$(geant4-config --has-feature qt)" != "yes" ]]; then
-  die "Current Geant4 install has Qt UI disabled. Rebuild Geant4 with Qt enabled for full Geant4 UI."
+  die "Current Geant4 install has Qt UI disabled. Run: ./scripts/setup_wsl_geant4.sh --with-qt --rebuild-geant --install-deps"
 fi
 
 mkdir -p "${APP_BUILD_DIR}"
 
 if [[ ! -x "${APP_BIN}" ]]; then
   log "App binary not found, configuring/building app first"
+  GEANT4_CMAKE_DIR="$(find_geant4_cmake_dir)"
   (
     cd "${APP_BUILD_DIR}"
     cmake -DCMAKE_INSTALL_PREFIX="${REPO_ROOT}/app-install" \
-      -DGeant4_DIR="${HOME}/geant-install/lib/Geant4-10.7.2" \
+      -DGeant4_DIR="${GEANT4_CMAKE_DIR}" \
       ..
     cmake --build . -j"$(nproc 2>/dev/null || echo 4)"
   )

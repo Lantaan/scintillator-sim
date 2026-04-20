@@ -38,7 +38,14 @@
 #include "globals.hh"
 
 //#include "g4root.hh"
+#if __has_include("g4csv.hh")
 #include "g4csv.hh"
+#elif __has_include("G4CsvAnalysisManager.hh")
+#include "G4CsvAnalysisManager.hh"
+using G4AnalysisManager = G4CsvAnalysisManager;
+#else
+#include "G4AnalysisManager.hh"
+#endif
 //#include "g4xml.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

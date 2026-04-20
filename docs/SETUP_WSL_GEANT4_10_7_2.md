@@ -1,5 +1,9 @@
 # Complete Setup Guide: Geant4 10.07.p02 on WSL Ubuntu 24.04
 
+> Legacy guide for pinned Geant4 10.7.2 setups.
+> For the current auto-latest Linux/WSL flow, use:
+> `docs/SETUP_LINUX_GEANT4_LATEST.md`
+
 # TLDR
 Run `scripts/setup_wsl_geant4.sh`. Make sure you have Geant4 installed (most reliably version 10.07.p02), and the script has permission to be executed.
 
