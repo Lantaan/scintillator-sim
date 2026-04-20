@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 GEANT4_SH="${HOME}/geant-install/bin/geant4.sh"
 DATA_DIR="${REPO_ROOT}/data"
-DEFAULT_MACRO="${REPO_ROOT}/1gamma.mac"
+DEFAULT_MACRO="${REPO_ROOT}/default.mac"
 
 log() {
   printf '[batch] %s\n' "$*"

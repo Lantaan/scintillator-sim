@@ -57,9 +57,7 @@ endif()
 # relies on these scripts being in the current working directory.
 #
 set(OpNovice2_SCRIPTS
-    1gamma.mac
-    1.mac
-    vis.mac
+        vis.mac
   )
 
 foreach(_script ${OpNovice2_SCRIPTS})
