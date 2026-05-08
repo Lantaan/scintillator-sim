@@ -460,6 +460,46 @@ validate_environment() {
   fi
 }
 
+qt6_cmake_available() {
+  local check_file
+  check_file="$(mktemp)"
+  cat > "${check_file}" <<'EOF'
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
+find_package(Qt6 QUIET CONFIG COMPONENTS Core)
+if(NOT Qt6_FOUND)
+  message(FATAL_ERROR "Qt6 not found")
+endif()
+EOF
+
+  if cmake -P "${check_file}" >/dev/null 2>&1; then
+    rm -f "${check_file}"
+    return 0
+  fi
+
+  rm -f "${check_file}"
+  return 1
+}
+
+ensure_qt6_available() {
+  if [[ "${WITH_QT}" -eq 0 ]]; then
+    return 0
+  fi
+
+  if [[ "${DRY_RUN}" -eq 1 ]]; then
+    return 0
+  fi
+
+  if qt6_cmake_available; then
+    return 0
+  fi
+
+  if [[ "${INSTALL_DEPS}" -eq 0 ]]; then
+    die "Qt6 CMake package files were not found (Qt6Config.cmake). Re-run with --install-deps --with-qt, or install Qt6 dev packages manually (Ubuntu/Debian: qt6-base-dev; Fedora/RHEL: qt6-qtbase-devel; Arch: qt6-base; openSUSE: qt6-base-devel)."
+  fi
+
+  die "Qt6 CMake package files are still missing after dependency installation. Ensure Qt6 development packages are installed and that CMake can locate Qt6Config.cmake (set CMAKE_PREFIX_PATH if Qt is installed in a non-standard location)."
+}
+
 geant_install_ready() {
   [[ -f "${GEANT_INSTALL_DIR}/bin/geant4.sh" ]] || return 1
   find_geant4_cmake_dir >/dev/null 2>&1 || return 1
@@ -548,6 +588,8 @@ if [[ "${INSTALL_DEPS}" -eq 1 ]]; then
   fi
   install_dependencies "${configure_qt}"
 fi
+
+ensure_qt6_available
 
 if [[ "${FORCE_CLEAN}" -eq 1 ]]; then
   log "Cleaning previous source/build/install outputs"

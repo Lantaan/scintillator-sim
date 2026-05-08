@@ -121,6 +121,37 @@ Resolution:
 
 - script now detects non-symlink `~/geant-install`, moves it to a timestamped backup, and creates a correct symlink to `~/geant-install-<version>`.
 
+### Qt6Config.cmake / Qt6 package not found
+
+Symptom during Geant4 configure:
+
+- `Could not find a package configuration file provided by "QT"`
+- missing:
+  - `Qt6Config.cmake`
+  - `qt6-config.cmake`
+
+Cause:
+
+- Qt6 development package files are not installed, or
+- Qt6 is installed in a non-standard location and CMake cannot find it.
+
+Resolution:
+
+1. Preferred (automatic):
+   - run setup with dependency installation enabled:
+   - `./scripts/setup_wsl_geant4.sh --install-deps --with-qt --rebuild-geant`
+2. Manual package install (if not using `--install-deps`):
+   - Ubuntu/Debian: `qt6-base-dev`
+   - Fedora/RHEL: `qt6-qtbase-devel`
+   - Arch: `qt6-base`
+   - openSUSE: `qt6-base-devel`
+3. If Qt6 is in a custom path, export CMake prefix path before running setup:
+   - `export CMAKE_PREFIX_PATH=/path/to/qt6/cmake:$CMAKE_PREFIX_PATH`
+
+Note:
+
+- The setup script now pre-checks Qt6 availability when `--with-qt` is selected and fails early with this guidance.
+
 ### No package manager match for `--install-deps`
 
 If your distro is not `apt`/`dnf`/`pacman`/`zypper`, install equivalent packages manually and run script without `--install-deps`.
