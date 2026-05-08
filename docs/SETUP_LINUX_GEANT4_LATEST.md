@@ -28,7 +28,7 @@ The script will:
 # Pin a specific Geant4 release
 ./scripts/setup_wsl_geant4.sh --geant-version 11.4.0
 
-# Build without Qt support
+# Build without Qt support (this will mean no UI ever)
 ./scripts/setup_wsl_geant4.sh --without-qt
 
 # Force legacy patch use
@@ -43,6 +43,20 @@ The script will:
 # Rebuild Geant4 even if this version is already installed
 ./scripts/setup_wsl_geant4.sh --rebuild-geant
 ```
+
+## Running Without Qt (Headless/Batch)
+
+If you do not need interactive UI/visualization windows, Qt is not required.
+
+- Build/setup without Qt:
+  - `./scripts/setup_wsl_geant4.sh --without-qt`
+- Run in batch mode:
+  - `./scripts/run_batch.sh`
+
+Notes:
+
+- This path is suitable for servers or restricted machines without sudo/admin access.
+- `scripts/run_ui_local.sh` requires a Qt-enabled Geant4 build and a local GUI session.
 
 ## What Changed vs Legacy 10.7.2 Flow
 
