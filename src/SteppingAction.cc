@@ -65,12 +65,12 @@ SteppingAction::~SteppingAction()
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void SteppingAction::UserSteppingAction(const G4Step* step)
 {
-  G4bool absorb_position=1; 	   //write down eventID, x (and y) for optical photons absorbed in SiPM 	nt_absorption.csv/h2_absXY.csv 	#1
-  G4bool status         =0;		   //write down optical photons interaction		                   nt_status.csv		                #5
-  G4bool abs_spectrum   =0;	     //spectrum of the optical photons absorbed in SiPM 		              nt_abs_sp.csv		                #4
-  G4bool scint_spectrum =0;	     //spectrum of scintillated optical photons			                        nt_scintillation.csv	          #2
-  G4bool scint_depth    =1;		   //z of the scintillation process			                    nt_scint_depth.csv	            #3
-  theta         =false;		   //primary interaction of gamma photons                                 nt_pr_int.csv                   #6
+  const G4bool absorb_position = true;
+  const G4bool status = true;
+  const G4bool abs_spectrum = true;
+  const G4bool scint_spectrum = true;
+  const G4bool scint_depth = true;
+  theta = true;
 
 
 
@@ -115,21 +115,21 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
         			       G4double x1 = dir.x();
         			       G4double y1 = dir.y();
         			       // fill histogram with absorption position (XY)            ****************************************************
-                     //analysisMan->FillH2(0, x1/mm, y1/mm);
+                     analysisMan->FillH2(0, x1/mm, y1/mm);
                      // fill histogram with absorption position (R)            ****************************************************
-                     //analysisMan->FillH1(1, sqrt(pow(x1,2) + pow(y1,2))/mm);
+                     analysisMan->FillH1(1, sqrt(pow(x1,2) + pow(y1,2))/mm);
                      // fill histogram with absorption position (X)            ****************************************************
-                     //analysisMan->FillH1(2, x1/mm);
+                     analysisMan->FillH1(2, x1/mm);
 
                      // fill histogram with absorption position (X) and eventID            ****************************************************
-                     //analysisMan->FillH2(1, x1/mm, eventID);
+                     analysisMan->FillH2(1, x1/mm, eventID);
                       // fill histogram with absorption position (R) and eventID            ****************************************************
                      analysisMan->FillH2(2, sqrt(pow(x1,2) + pow(y1,2))/mm, eventID);
 				             // fill ntuple with absorption position (XY)
-				             //analysisMan->FillNtupleIColumn(1, 0, eventID);
-                		 //analysisMan->FillNtupleFColumn(1, 1, x1/mm);
-                		 //analysisMan->FillNtupleFColumn(1, 2, y1/mm);
-        			       //analysisMan->AddNtupleRow(1);
+				             analysisMan->FillNtupleIColumn(1, 0, eventID);
+                		 analysisMan->FillNtupleFColumn(1, 1, x1/mm);
+                		 analysisMan->FillNtupleFColumn(1, 2, y1/mm);
+        			       analysisMan->AddNtupleRow(1);
                 }
                 if (abs_spectrum){
 
@@ -149,7 +149,11 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
                     run->AddOpAbsorptionPriorScint();
                     event->AddOpAbsorptionPriorScint_ev();
                 }
-                if (currentPhysicalName=="SiPM") {
+                if ((currentPhysicalName=="SiPM") or (currentPhysicalName=="SiPMXY") or (currentPhysicalName=="SiPMYZ2")
+                  or (currentPhysicalName=="SiPMYZ1") or (currentPhysicalName=="SiPM_Box1") or (currentPhysicalName=="SiPM_Box2")
+                  or (currentPhysicalName=="SiPMTrap1") or (currentPhysicalName=="SiPMTrap2")
+                  or (currentPhysicalName=="SiPMTrap01") or (currentPhysicalName=="SiPMTrap02")
+                  or (currentPhysicalName=="SiPMTrap11") or (currentPhysicalName=="SiPMTrap12")) {
                     run->AddOpAbsorptionPriorSiPM();
                     event->AddOpAbsorptionPriorSiPM_ev();
                 }
@@ -163,6 +167,9 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
     // optical process has endpt on bdry,
     if (status){
     	if (endPoint->GetStepStatus() == fGeomBoundary) {
+          if (step->GetPostStepPoint()->GetPhysicalVolume() == nullptr) {
+            return;
+          }
       		const G4String NextPhysicalName = step->GetPostStepPoint()->GetPhysicalVolume()->GetName();
       		const G4String currentPhysicalName = step->GetPreStepPoint()->GetPhysicalVolume()->GetName();
       		const G4DynamicParticle* theParticle = track->GetDynamicParticle();
@@ -274,14 +281,16 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
                   // 		counts scintillation photons in event
 
                     G4float z_scint = sec->GetPosition().z()/mm;
+                    event->AddScintillation_ev();
                     event->AddScintillation_ev_depth(z2);
 
                   //event->AddScintillation_ev_depth2(z_scint);
 	        	        // compute mean scintillation position                          ****************************************************
-                    //event->MeanScintDepth_ev(z2);
+                    event->MeanScintDepth_ev(z_scint);
                 }
-                // 		counts scintillation photons in event
-                event->AddScintillation_ev();
+                else {
+                  event->AddScintillation_ev();
+                }
 
 
 
@@ -326,12 +335,14 @@ void SteppingAction::GammaPrimaryInteraction(const G4Step* step, G4AnalysisManag
     // track->SetTrackStatus(fKillTrackAndSecondaries);
     run->AddConv();
     aMan->FillNtupleIColumn(6, 3, 0);		//conv - 0
+    aMan->FillNtupleFColumn(6, 4, en_track/keV);
     aMan->AddNtupleRow(6);
   }
 
   else if (proc =="compt"){
     run->AddCompt();
     aMan->FillNtupleIColumn(6, 3, 1);		//compt - 1
+    aMan->FillNtupleFColumn(6, 4, en_track/keV);
     aMan->AddNtupleRow(6);
     //  track->SetTrackStatus(fKillTrackAndSecondaries);
 
@@ -360,8 +371,8 @@ void SteppingAction::GammaPrimaryInteraction(const G4Step* step, G4AnalysisManag
     //track->SetTrackStatus(fKillTrackAndSecondaries);
     run->AddPhot();
     aMan->FillNtupleIColumn(6, 3, 2);		//phot - 2
+    aMan->FillNtupleFColumn(6, 4, en_track/keV);
     aMan->AddNtupleRow(6);
   }
-  aMan->FillNtupleFColumn(6, 4, en_track/keV);
 
 }

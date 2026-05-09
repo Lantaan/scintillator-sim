@@ -3,6 +3,8 @@
 #include "globals.hh"
 #include "G4RunManager.hh"
 #include "HistoManager.hh"
+#include <algorithm>
+#include <cmath>
 
 class RunAction;
 class G4Event;
@@ -66,9 +68,17 @@ class EventAction : public G4UserEventAction
 // count mean scintillation depth
    void MeanScintDepth_ev(G4double z2) {
      Scint_depth = (Scint_depth * (ScintPhotons-1)+z2)/ScintPhotons;
-     //Scint_depth_std = (Scint_depth_std * (ScintPhotons-1)+pow((Scint_depth-z2),2))/ScintPhotons;
-
+     Scint_depth_sum += z2;
+     Scint_depth_sum2 += z2 * z2;
     }
+
+   G4double GetScintDepthStdEv() const {
+     if (ScintPhotons <= 0) { return 0.0; }
+     const G4double mean = Scint_depth_sum / ScintPhotons;
+     const G4double mean2 = Scint_depth_sum2 / ScintPhotons;
+     const G4double variance = std::max(0.0, mean2 - mean * mean);
+     return std::sqrt(variance);
+   }
 
 
 	G4double Absenergy;
@@ -91,6 +101,8 @@ class EventAction : public G4UserEventAction
   G4long ScintPhotons_9;
 	G4double Scint_depth;
 	G4double Scint_depth_std;
+  G4double Scint_depth_sum;
+  G4double Scint_depth_sum2;
 
 	G4long TotalInternalReflection;
 	G4long FresnelRefraction;

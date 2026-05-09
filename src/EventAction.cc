@@ -55,6 +55,8 @@ void EventAction::BeginOfEventAction(const G4Event*)
 
 	Scint_depth = 0.;
   Scint_depth_std = 0.;
+  Scint_depth_sum = 0.;
+  Scint_depth_sum2 = 0.;
 
 //	G4cout << "Begin of event" << G4endl;
 }
@@ -67,8 +69,9 @@ void EventAction::EndOfEventAction(const G4Event* evt) {
 
   // get analysis manager. add "1" if there is another Ntuple
 
+  static G4AnalysisManager *analysisMan = G4AnalysisManager::Instance();
+
   if (ScintPhotons > 0) {
-    static G4AnalysisManager *analysisMan = G4AnalysisManager::Instance();
     analysisMan->FillNtupleIColumn(0, eventID);
     analysisMan->FillNtupleIColumn(1, ScintPhotons);
     analysisMan->FillNtupleIColumn(2, ScintPhotons_0);
@@ -102,8 +105,10 @@ void EventAction::EndOfEventAction(const G4Event* evt) {
     analysisMan->AddNtupleRow(5);
   }
 
-//  analysisMan->FillNtupleFColumn(7, 0, pow(Scint_depth_std,0.5)/mm);
-//  analysisMan->AddNtupleRow(7);
+  if (ScintPhotons > 0) {
+    analysisMan->FillNtupleFColumn(7, 0, GetScintDepthStdEv() / mm);
+    analysisMan->AddNtupleRow(7);
+  }
 
   // Print per event (modulo n)
   //

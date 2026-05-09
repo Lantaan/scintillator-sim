@@ -2,6 +2,33 @@
 
 This document explains all data values defined in the simulation outputs, what they mean physically, whether they are configurable from `.mac`, and why they may be missing or zero.
 
+## Quick file-to-ntuple mapping
+
+These CSV files are written in the `data/` directory and correspond to ntuple indices in Geant4 analysis activation commands.
+
+| Output file                      | Ntuple index | Ntuple name       | Physical meaning (short)                                                                             |
+|----------------------------------|--------------|-------------------|------------------------------------------------------------------------------------------------------|
+| `results_nt_phot_count.csv`      | 0            | `phot_count`      | Event-level scintillation photon yield and depth-bin counts.                                         |
+| `results_nt_absorption.csv`      | 1            | `absorption`      | XY positions where optical photons are absorbed in SiPM volumes.                                     |
+| `results_nt_scintillation.csv`   | 2            | `scintillation`   | Energy spectrum of emitted scintillation optical photons.                                            |
+| `results_nt_scint_depth.csv`     | 3            | `scint_depth`     | Mean scintillation production depth per event (z).                                                   |
+| `results_nt_abs_sp.csv`          | 4            | `abs_sp`          | Energy spectrum of optical photons absorbed in SiPM volumes.                                         |
+| `results_nt_status.csv`          | 5            | `status`          | Per-event optical interaction counters (absorptions, reflections, refractions, boundary absorption). |
+| `results_nt_pr_int.csv`          | 6            | `pr_int`          | Primary gamma interaction records: depth, process type, track id, energy.                            |
+| `results_nt_scint_depth_std.csv` | 7            | `scint_depth_std` | Event-level spread (standard deviation) of scintillation depth.                                      |
+| `results_nt_scat_angles.csv`     | 8            | `scat_angles`     | Gamma direction/energy before vs after scattering (Compton branch).                                  |
+
+Related histogram CSVs (not ntuples):
+
+| Output file              | Histogram name | Physical meaning (short)                      |
+|--------------------------|----------------|-----------------------------------------------|
+| `results_h2_absXY.csv`   | `absXY`        | 2D map of SiPM absorption positions.          |
+| `results_h2_X_ev.csv`    | `X_ev`         | X-position distribution vs event axis.        |
+| `results_h2_R_ev.csv`    | `R_ev`         | Radial absorption distribution vs event axis. |
+| `results_h1_sc_spec.csv` | `sc_spec`      | Scintillation energy spectrum histogram.      |
+| `results_h1_absR.csv`    | `absR`         | Radial distribution of absorbed photons.      |
+| `results_h1_absX.csv`    | `absX`         | X distribution of absorbed photons.           |
+
 ## How output activation works
 
 The analysis system is controlled in macro files (for example [`default.mac`](/D:/scintillator-sim/default.mac)):
@@ -156,3 +183,22 @@ Run totals are accumulated in [`src/Run.cc`](/D:/scintillator-sim/src/Run.cc) an
     3. code path disabled by hardcoded switch,
     4. fill lines are commented out.
 - "Written but zero" usually means data row exists but the corresponding process did not occur, or the calculation path is incomplete (for example `scint_depth` currently).
+
+## Update (2026-05-08): ntuple write-path fixes
+
+The following paths were enabled/fixed in code:
+
+- Ntuple 1 (`absorption`) fill is active again.
+- Ntuple 2 (`scintillation`) fill is active again.
+- Ntuple 4 (`abs_sp`) fill is active again.
+- Ntuple 5 boundary-status counters are active again.
+- Ntuple 7 (`scint_depth_std`) fill is active again.
+- Ntuple 8 (`scat_angles`) fill is active again for qualifying Compton steps.
+- Ntuple 6 (`pr_int`) now writes `energy_track` in the same row (column-fill order fixed).
+- Ntuple 3 (`scint_depth`) now uses a valid mean-depth update path (no `NaN`).
+
+Operational side effects observed during validation:
+
+- Runtime increase is significant when all ntuples are active (high I/O cost).
+- Output size increase is significant, especially for per-photon ntuples (for example `absorption`, `scintillation`, `abs_sp`).
+- This is expected behavior; users should activate only the ntuples needed for a given study.
