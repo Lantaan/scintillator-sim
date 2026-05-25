@@ -39,8 +39,10 @@ resolve_macro() {
 [[ -f "${GEANT4_SH}" ]] || die "Missing Geant4 environment script: ${GEANT4_SH}"
 source "${GEANT4_SH}"
 
-APP_BIN=""
-if [[ -x "${REPO_ROOT}/app-install/bin/OpNovice2" ]]; then
+APP_BIN="${OPNOVICE_BIN:-}"
+if [[ -n "${APP_BIN}" ]]; then
+  [[ -x "${APP_BIN}" ]] || die "OPNOVICE_BIN is not executable: ${APP_BIN}"
+elif [[ -x "${REPO_ROOT}/app-install/bin/OpNovice2" ]]; then
   APP_BIN="${REPO_ROOT}/app-install/bin/OpNovice2"
 elif [[ -x "${REPO_ROOT}/app-build/OpNovice2" ]]; then
   APP_BIN="${REPO_ROOT}/app-build/OpNovice2"

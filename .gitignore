@@ -40,3 +40,8 @@ geant4.10.07.p02.tar.gz
 
 # Data files
 *.csv
+*.png
+/data
+
+# TODO unfuck this
+/scripts
