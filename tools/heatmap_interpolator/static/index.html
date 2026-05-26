@@ -94,7 +94,8 @@
       text-transform: uppercase;
     }
 
-    input[type="number"] {
+    input[type="number"],
+    select {
       width: 100%;
       height: 38px;
       border: 1px solid var(--line);
@@ -297,7 +298,10 @@
       <div class="controls">
         <label>
           Photon energy (keV)
-          <input id="energy" type="number" min="1" step="1" value="662">
+          <div class="inline">
+            <input id="energy" type="number" min="200" max="1000" step="1" value="662">
+            <input id="energyRange" type="range" min="200" max="1000" step="1" value="662">
+          </div>
         </label>
 
         <label>
@@ -319,6 +323,16 @@
         <label>
           Neighbors
           <input id="neighbors" type="number" min="1" max="12" step="1" value="4">
+        </label>
+
+        <label>
+          Interpolation
+          <select id="mode">
+            <option value="hybrid" selected>Hybrid foreground OT</option>
+            <option value="ot">Pure optimal transport</option>
+            <option value="flow">Flow morph</option>
+            <option value="blend">Intensity blend</option>
+          </select>
         </label>
 
         <label class="toggle">
@@ -381,11 +395,13 @@
   <script>
     const els = {
       energy: document.getElementById("energy"),
+      energyRange: document.getElementById("energyRange"),
       theta: document.getElementById("theta"),
       thetaNumber: document.getElementById("thetaNumber"),
       phi: document.getElementById("phi"),
       phiNumber: document.getElementById("phiNumber"),
       neighbors: document.getElementById("neighbors"),
+      mode: document.getElementById("mode"),
       logScale: document.getElementById("logScale"),
       render: document.getElementById("render"),
       reset: document.getElementById("reset"),
@@ -538,11 +554,13 @@
       const theta = Number(els.theta.value);
       const phi = Number(els.phi.value);
       const k = Math.max(1, Math.min(12, Number(els.neighbors.value || 4)));
+      const mode = els.mode.value;
       return new URLSearchParams({
         energy: String(energy),
         theta: String(theta),
         phi: String(phi),
         k: String(k),
+        mode,
       });
     }
 
@@ -562,11 +580,17 @@
         const shape = response.headers.get("X-Shape").split("x").map(Number);
         const contributors = JSON.parse(response.headers.get("X-Contributors") || "[]");
         const exact = response.headers.get("X-Exact-Match") === "1";
+        const mode = response.headers.get("X-Mode") || "blend";
         els.interpMs.textContent = `${Number(response.headers.get("X-Interp-Ms")).toFixed(3)} ms`;
         els.requestMs.textContent = `${requestMs.toFixed(1)} ms`;
         renderContributors(contributors);
         renderCanvas(new Float32Array(buffer), shape[0], shape[1]);
-        els.notice.textContent = exact ? "Exact cached heatmap" : "Interpolated from nearest cached heatmaps";
+        const modeLabel =
+          mode === "hybrid" ? "Hybrid foreground-OT"
+          : mode === "ot" ? "Pure optimal-transport"
+          : mode === "flow" ? "Flow-morphed"
+          : "Intensity-blended";
+        els.notice.textContent = exact ? `Exact cached heatmap (${mode})` : `${modeLabel} from nearest cached heatmaps`;
       } catch (error) {
         els.notice.textContent = error.message;
       }
@@ -598,26 +622,37 @@
       const energies = metadata.samples.map((s) => s.energy_kev);
       const theta = metadata.samples.map((s) => s.theta_deg);
       const phi = metadata.samples.map((s) => s.phi_deg);
+      const energyMin = Math.floor(Math.min(...energies));
+      const energyMax = Math.ceil(Math.max(...energies));
+      els.energy.min = String(energyMin);
+      els.energy.max = String(energyMax);
+      els.energyRange.min = String(energyMin);
+      els.energyRange.max = String(energyMax);
       els.datasetStatus.textContent =
         `${metadata.sample_count} samples, E ${Math.min(...energies).toFixed(0)}-${Math.max(...energies).toFixed(0)} keV, ` +
         `theta ${Math.min(...theta).toFixed(0)}-${Math.max(...theta).toFixed(0)} deg, ` +
-        `phi ${Math.min(...phi).toFixed(0)}-${Math.max(...phi).toFixed(0)} deg`;
+        `phi ${Math.min(...phi).toFixed(0)}-${Math.max(...phi).toFixed(0)} deg, ` +
+        `${metadata.has_ot_fields ? "OT ready" : "OT unavailable"}, ` +
+        `${metadata.has_flow_fields ? "flow ready" : "flow unavailable"}`;
     }
 
+    syncPair(els.energyRange, els.energy);
     syncPair(els.theta, els.thetaNumber);
     syncPair(els.phi, els.phiNumber);
-    for (const input of [els.energy, els.neighbors, els.logScale]) {
+    for (const input of [els.neighbors, els.mode, els.logScale]) {
       input.addEventListener("input", queueLiveRender);
       input.addEventListener("change", queueLiveRender);
     }
     els.render.addEventListener("click", queueLiveRender);
     els.reset.addEventListener("click", () => {
       els.energy.value = "662";
+      els.energyRange.value = "662";
       els.theta.value = "45";
       els.thetaNumber.value = "45";
       els.phi.value = "0";
       els.phiNumber.value = "0";
       els.neighbors.value = "4";
+      els.mode.value = "hybrid";
       els.logScale.checked = true;
       queueLiveRender();
     });
