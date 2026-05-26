@@ -1,0 +1,2436 @@
+Max-Planck-Institut für                         Technische Universität München
+Extraterrestrische Physik                                   Fakultät für Physik
+
+
+
+
+                            Bachelor Thesis
+
+
+
+  Light Simulation in a CeBr3 Scintillator
+       Simulation der Lichtausbreitung in einem CeBr3 Szintillator
+
+                            Anna Ovsiannikova
+
+                            23. Dezember 2020
+Erstgutachter (Themensteller): PD Dr. Jochen Greiner
+Zweitgutachter: Prof. Dr. Lothar Oberauer
+Contents
+1 Introduction                                                                        6
+  1.1 Motivation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      6
+  1.2 Gamma spectroscopy . . . . . . . . . . . . . . . . . . . . . . . . . . .        7
+  1.3 Scintillator detectors . . . . . . . . . . . . . . . . . . . . . . . . . . .    8
+  1.4 Interaction of particles with matter . . . . . . . . . . . . . . . . . . .     11
+       1.4.1 Interaction of gamma photons with matter . . . . . . . . . .            11
+       1.4.2 Interaction of charged particles with matter . . . . . . . . . .        15
+       1.4.3 Optical photons interactions . . . . . . . . . . . . . . . . . . .      16
+  1.5 Gamma photons detection . . . . . . . . . . . . . . . . . . . . . . . .        18
+  1.6 Gamma and optical photons simulation in GEANT4 . . . . . . . . .               19
+
+2 Simulation                                                                         21
+  2.1 Simulation setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     21
+  2.2 Verification of the material properties . . . . . . . . . . . . . . . . .      23
+      2.2.1 Scintillation spectrum . . . . . . . . . . . . . . . . . . . . . .       23
+      2.2.2 Gamma photons interactions . . . . . . . . . . . . . . . . . .           24
+      2.2.3 Light yield distribution . . . . . . . . . . . . . . . . . . . . .       25
+      2.2.4 Optical photons bulk absorption . . . . . . . . . . . . . . . .          27
+      2.2.5 Reflection at different surfaces . . . . . . . . . . . . . . . . .       27
+
+3 Results                                                                            31
+  3.1 Detection efficiency and photopeak efficiency . . . . . . . . . . . . .        31
+      3.1.1 Detection efficiency of bare CeBr3 crystal . . . . . . . . . . .         31
+      3.1.2 Effect of the encapsulation of the crystal and the direction of
+             the incoming gamma photons . . . . . . . . . . . . . . . . . .          33
+  3.2 Light distribution at the bottom of the scintillator . . . . . . . . . .       34
+      3.2.1 Light distribution at the bottom of the bare crystal . . . . .           34
+      3.2.2 Effect of the the direction of the incoming gamma photons .              36
+      3.2.3 Effect of the reflector . . . . . . . . . . . . . . . . . . . . . . .    37
+
+4 Conclusions and perspectives                                                       40
+
+Appendices                                                                           42
+
+References                                                                           57
+
+
+
+                                                                                      3
+Abstract
+The POLAR-2 instrument is going to perform detailed measurements of polarization
+degree and angle of the prompt emission of Gamma Ray Bursts. A spectrometer
+as a part of the instrument should provide spectral and location measurements
+for all GRBs observed by POLAR-2. Due to its excellent properties such as high
+light yield, short decay time, good energy resolution and low intrinsic activity the
+inorganic CeBr3 scintillator is considered to be very promising in achieving this goal.
+In order to investigate its properties a GEANT4 simulation of CeBr3 scintillator of
+various shapes and sizes with different models of reflecting at the crystal surfaces
+was developed. Both absorption and photo-peak efficiency of a CeBr3 crystal as well
+as the light propagation in it were studied. The influence of the reflecting model
+choice on the light output was shown.
+
+
+
+
+4
+Danksagung
+Ich möchte mich gern bei Dr Jochen Greiner für die Möglichkeit meine Bachelor-
+arbeit am MPE durchzuführen sowie für deren Betreuung und Begutachtung als
+auch für die hilfreichen Hinweise bedanken. Für die Unterstützung bei der Fragen
+bezüglich GEANT4 bedanke ich mich bei Merlin Kole. Außerdem bedanke ich mich
+bei Dr. Lothar Oberauer, der die Zweitbegutachtung vornimmt.
+
+
+
+
+                                                                              5
+Chapter 1
+Introduction
+The first chapter gives a briefly introduction into aims of the gamma spectroscopy,
+GEANT4 and those particle interaction with matter, that are relevant to the per-
+formed simulation. The second chapter describes the simulation setup and the veri-
+fication of the material property of the CeBr3 . The third part deals with the results
+of the simulations. The last chapter sums the thesis up.
+
+
+1.1 Motivation
+The Gamma Ray Bursts (GRBs) are very bright bursts of γ rays that can last from
+milliseconds to hours. Those of them that last below 2 seconds are called short
+bursts and originate from the merger of two neutrons stars. The long bursts last
+longer than 2 seconds and are supposed to be the result of the collapse of massive
+stars. The prompt emission of GRB is followed by the afterglow of lower energy in
+optical and radio bands.
+   There are some models describing the mechanism of particle acceleration that
+leads to the observed prompt emission. Each of them has diverse prediction about
+the polarization degree and angle of GRB [16]. If the prompt emission is the result of
+synchrotron radiation, the polarization degree is predicted to be 50%. The polariza-
+tion degree in models describing the prompt emission as a result of inverse-Compton
+scattering correlates strongly with the angle between the jet and an observer: in a
+case of a large angle high polarization angle is predicted. Otherwise unpolarized
+GRBs are forecasted. The measurements of the polarization degree and angle of the
+prompt emission of Gamma-Ray Bursts should provide essential data to constrain
+the theoretical models.
+   The POLAR instrument, which worked on board the Chinese space laboratory
+Tiangong-2 from September 2016 till April 2017, has reported polarization meas-
+urements of 14 observed GRBs [15]. The analysis of those measurements has shown
+that the larger sample is required. POLAR-2, which is going to be launched in 2024
+and placed on the China Space Station, should provide those measurements due to
+an increase in the effective area of one order of magnitude compared that of POLAR
+[16].
+
+
+
+6
+                                                            1.2 Gamma spectroscopy
+
+
+   To inquire the detailed spectral and location measurements for all observed GRBs
+and do not rely on those measurements from the other detectors POLAR2 is going
+to be supplied with a spectrometer in addition to the polarimeter. The spectrometer
+should allow to localize a short GRB as faint as GRB 170817A to better than 2◦
+radius (2σ) and the peak energy for such GRBs should be measured to better than
+30% up to 2 MeV [2]. To achieve this goal several modules of CeBr3 scintillators are
+going to be used, as a CeBr3 crystal is supposed to meet the necessary performance
+criteria due to its excellent properties.
+   As a variety of factors affects the response of the detector the detailed simulation
+of optical physics processes is required.
+
+
+1.2 Gamma spectroscopy
+GRBs are not the only subject of Gamma spectroscopy [3], [7]. The compact objects
+like neutron stars and black holes as well as more extended regions such as supernova
+remnants or the inner galaxies emit gamma radiation. Gamma photons travel in
+straight lines, that allows the accurate determination of their origin. Gamma rays
+also trace very energetic processes of supernova explosions.
+   A white dwarf can becomes supernova during the nuclear fusion of carbon and
+oxygen and Si burning (type Ia). A massive star results in a supernova after it
+develops iron core of such a size, that the core can not be sustained any more
+and a gravitational collapse occurs. While the supernova explosions the 56 Ni is
+produced, that decays later into 56 Co and 56 Fe with gamma ray emission. As it starts
+expanding a supernova is dense enough to absorb all gamma rays from 56 Ni, but with
+the time more and more of the gamma photons escape and can be observed. The
+evolution of gamma spectrum thus gives information about the supernova dynamics
+and nucleosynthesis. Significant spectral lines in case of core collapse supernova can
+be obtained from decay of 44 Ti, which is related to the supernova remnant, and
+longer lived 26 Al and 60 Fe.
+   The other objective of the gamma spectrometry is the determination of the ele-
+mental composition of the surface of the planets in the Solar system, e. g. Mercury
+(BepiColombo mission), Mars (Mars Odyssey mission) and Moon (Lunar Prospector
+and LRO).
+   Due to lack of the atmosphere the galactic cosmic rays (GCR) can freely reach the
+surface of the planet and interact with the matter of planetary surfaces [19], [29],
+producing large amount of spallation neutrons.
+   Those neutrons undergo the inelastic scattering and radiative capture, emitting
+the characteristic gamma rays. As every chemical element has its own set of gamma
+ray lines it is possible to identify uniquely the presence and the abundance of the
+certain element in the sample.
+
+
+
+                                                                                     7
+Chapter 1 Introduction
+
+
+   As the intensity of the spectral lines depends not only on the abundance of the
+elements but also on the spectral distribution of the neutron flux the knowledge of
+the neutron albedo is crucial. That is why the neutron spectrometer complements
+such gamma spectrometers.
+
+
+1.3 Scintillator detectors
+A scintillator crystal converts the deposited energy of an incoming particle into
+luminescence light, which can be detected by a photodetector [23], [25], [14]. The
+crystal with a photomultiplier tube makes up a scintillator detector.
+   There are two groups of scintillators: organic and inorganic scintillators. The
+organic scintillators have relatively low density, they can not stop the high energy
+particles and only measure a small fraction of energy of the particle. Nevertheless
+organic scintillators have excellent timing properties as well as low price and can
+be produced in almost every geometry. The mechanism of light emission in organic
+scintillators is a molecular effect.
+   The inorganic scintillators are used as calorimeters that can measure the total
+deposited energy, completely absorbing the particle. They have high atomic number
+and high density. The luminescent properties of such scintillators are based on the
+energy bands created in a crystal lattice, due to the interaction of the energy levels
+of individual atoms.
+   Gamma photons absorbed by the scintillation material (see 1.4.1) produce primary
+electrons and positrons, those then lose their kinetic energy by collisions leaving the
+ionization track of the secondary electron-hole pairs. The secondary electrons are
+excited from the valence band, where they are bound at the lattice sites, to the
+conduction band (fig. 1.1) with the band-gap energy Eg . If the energy is insufficient
+the excitons are formed on an exciton band below the conduction one.
+   The electrons in the conduction band can move throughout the crystal and ionize
+it, creating new electrons. As soon as all these electrons are thermalized, they can
+recombine over the gap, emitting the optical (UV) photon. The de-excitation of the
+scintillator gives off light with the yield proportional to the deposited energy.
+   Non radiative recombination as well as self-absorption quenches the light output.
+Special impurities in the lattice located at the luminescence centers increase the
+probability of radiative recombination by creating an additional energy level inside
+the gap.
+   The energy efficiency  of the scintillator is the product of the efficiency of conver-
+sion of the incoming particle energy into the electron-hole pairs (1/k), the efficiency
+of the energy transportation to the luminescent centers S and that of light generating
+Q:
+                                        hνSQ
+                                    =          = hνL,                               (1.1)
+                                         kEg
+
+
+8
+                                                                           1.3 Scintillator detectors
+
+
+
+
+Figure 1.1: The band structure with the band gap energy Eg : a valence electron moves from the valence
+band to the conduction band. An electronic level inside of the forbidden gap originates from the impurities
+called activators (from [25]).
+
+
+
+   where L is the light yield.
+   For ionic crystals the maximum value of light yield attains about 660/Eg .
+   The main characteristics of scintillators are energy resolution, detection efficiency,
+full energy peak efficiency, decay time of the light puls and non-proportionality.
+   A scintillator’s energy resolution R (eq. 1.2) is the ratio of the full width at half-
+maximum (FWHM) of the peak of the spectrum to the magnitude of the peak E
+[14] and is the property of the material.
+
+                                        F W HM
+                                            R=                               (1.2)
+                                           E
+  Detection efficiency DE [10] is the ratio of the amount of events measured in a
+known interval D to that, emitted by the radiation source N (eq. 1.3). Materials
+with high atomic number and high density possess better detection efficiency than
+those with low atomic number and low density.
+
+                                              D
+                                               DE =                               (1.3)
+                                              N
+   Full energy peak detection efficiency or photo-peak efficiency is the ratio of the
+events in the photopeak only to all counted events.
+   Scintillation decay time is the time required for scintillation emission to decrease
+to 1/e of its maximum and is different for fast and slow component.
+   Non-proportionality is an intrinsic property of the scintillator and means a devi-
+ation from a linear response. The number of electron–hole pairs created per unit
+deposited energy is a function of energy and decreases with increasing ionization:
+e.g. light yield of NaI:Tl at 15keV is about 20% larger than that at 480keV [14].
+   NaI:Tl was the first discovered solid scintillator. It was historically employed in
+the gamma spectroscopy as well as CsI and is still the most common scintillator
+
+
+
+                                                                                                         9
+Chapter 1 Introduction
+
+
+
+
+Figure 1.2: The intrinsic activity of NaI, LaBr3 and CeBr3 crystals (from [21]). The CeBr3 activity is
+significantly below that of both others crystals.
+
+
+
+crystal used. It has low cost, energy resolution of about 6% [14], high brightness
+and can be grown to the large sizes. Still those scintillators have moderate time and
+energy resolution [3].
+   CdWO4 and BGO, which are also used in gamma-ray spectroscopy, have the
+advantage of extremely low background radioactivity but at the same time rather
+large decay constant.
+   Solid-state detectors such as Ge and CZT (Cadmium zinc telluride) obtain high
+resolution, but large enough detectors are very expensive. Besides the Ge detectors
+have to be cooled with liquid nitrogen to operate.
+   Recently developed scintillation materials CeBr3 and LaBr3 promise increasing
+detection performance especially in low energy band. Both of them are more dense
+than NaI, have noticeably higher light yield and better energy resolution as well as
+short decay time (17 ns for CeBr3 and 15 ns for LaBr3 ) [1].
+   However due to the presence of a radioactive isotop 138 La LaBr3 has significant
+intrinsic activity, spoiling the detection of gamma photons with energies below 1.5
+MeV. CeBr3 also obtains intrinsic activity, occurring due to 227 Ac contamination,
+as neither Ce nor Br have naturally radioactive isotope. But this activity is an
+order of magnitude less than that of LaBr3 (fig. 1.2). The detailed study of the
+characteristics of CeBr3 spectrometer is given in [1].
+   In [9] CeBr3 is considered to be used in future ESA planetary mission. Here
+among others the light yield as a function of temperature and gamma irradiation
+were studied. One more advantage of CeBr3 is its high gamma radiation hardness.
+   All these properties make CeBr3 very promising for applications in gamma spec-
+troscopy.
+
+
+
+
+10
+                                                          1.4 Interaction of particles with matter
+
+
+1.4 Interaction of particles with matter
+This section describes relevant interactions of gamma photons with energy from
+several tenth of keV to several MeV, electrons and positrons as secondary charged
+particles as well as optical photons produced as a result of scintillation. The section
+is based on [17], [18] and [20].
+
+1.4.1 Interaction of gamma photons with matter
+An incoming beam of photons passing through the matter undergoes the exponential
+reduction of the intensity due to scattering or absorption of single photons.
+
+                                               I = I0 e−(µx)                                             (1.4)
+
+   Linear attenuation coefficient µ in equation 1.4 gives a probability for a photon
+to be absorbed or scattered per unit distance traveled.
+   Photons can be absorbed by matter in a single or several sequential interactions.
+Each interaction changes the energy of incoming photons and can cause the emission
+of the atomic electrons.
+   The main photon interaction processes contributing to the total cross section are
+photoelectric effect, Compton scattering and pair production in Coulomb field (Fig.
+1.3 left).
+
+
+
+
+Figure 1.3: Left: Total cross section for gamma photons in CeBr3 at 0.001 - 5 MeV in cm2 /g. At low energies
+the total cross section that coincides here with that of photoelectric effect shows characteristic absorption
+edges. Those are K- and L-edges for each Ce and Br. L-edges form 3 slightly different absorption edges due
+to fine structure splitting (plotted from [30]). Right: Total to K-shell photoelectric cross section ratio [17].
+
+
+
+
+                                                                                                            11
+Chapter 1 Introduction
+
+
+1.4.1.1 The photoelectric effect
+The photoelectric effect, that dominates at low energies, results in a complete ab-
+sorption of primary photon energy Eγ by atomic electron cloud. If the gain of the
+energy by absorption of the photon exceeds the binding energy Ebind of an atomic
+electron, it can be emitted with the kinetic energy Ee :
+
+                                         Ee = Eγ − Ebind ,                                      (1.5)
+   The atom as a whole recoils so that the energy and momentum are conserved. By
+reason of conservation laws the absorption probability of this process increases with
+the growth of the binding energy of electrons. As the electron binding energy on
+the inner electron shell is much larger than that on the outer shell, the cross section
+of the photoelectric effect is the highest for the K-shell. That is why by the most
+absorption a K-shell electron will be emitted, if the incoming photon has sufficient
+energy.
+   The ratio of the total photoelectric cross section to the that of K-shell for different
+atomic numbers Z is almost independent of the energy of the photon and can be
+calculated by the formula 1.6. It increases with Z, but does not exceed 1.25 for large
+Z (Fig. 1.3, right).
+                    τph
+                        ≈ 1 + 0.01481 · ln2 · Z − 0.000788 · ln3 · Z,             (1.6)
+                    τk
+   If the photon energy larger than the binding energy of one of the shells the cross
+section decreases with the growth of the photon energy until it reaches the next shell
+level. At this point the cross section increases abruptly, the absorption curve shows
+characteristic absorption edges (K-edge and L-edge in Fig. 1.3 left).
+   The total photoelectric cross section is generally direct proportional to Z 5 . For
+non-relativistic energy region (hν < me c2 ) it can be described by Born approxima-
+tion, whereas by energies near to the absorption edges the usage of the exact wave
+functions is required.
+
+         Table 1.1: The binding energy of the K- and L-shells for Ce and Br atoms (from [5]).
+
+
+                      Element       Z       K         L1        L2        L3
+                         Br         35    13.481     1.787     1.605     1.556
+                         Ce         58    40.446     6.552     6.167     5.726
+
+
+
+
+12
+                                                            1.4 Interaction of particles with matter
+
+
+
+
+Figure 1.4: Left: Compton scattering [17]: an incoming photon with a wavelength λ hits an electron at rest,
+                                                     0
+resulting in a scattered photon with a wavelength λ ≥ λ and an electron ejected at the angle θe . Right:
+The energy distribution of a 500keV photon scattered at the different angles (red line) and that of an emitted
+electron also depending on the ejection angle (blue line) [27].
+
+
+
+1.4.1.2 Auger effect
+When as a result of the photoelectric effect an electron is ejected from the atomic
+shell (e.g. K), the atom is left in an exited state with a vacancy in this shell. An
+electron from the higher shell (e.g. L-shell) makes a transition to a vacant shell,
+releasing the energy E = Ebind (K) - Ebind (L). To reach the more stable state the
+atom can radiate a single X-ray photon (characteristic X-ray) or emit one or more
+electrons (Auger electrons) from higher shells. The ratio of the probabilities of both
+deexitation transitions is given by a empirical formula 1.7 [17]. For materials with
+Z > 30 the probability of the radiative transition exceeds that for non-radiative
+transition (emission of Auger electrons).
+
+                        Nk
+                             = (−6.4 + 3.4 · Z − 0.000103 · Z 3 )4 × 10−8                              (1.7)
+                      1 − Nk
+
+1.4.1.3 Compton scattering
+Compton or incoherent scattering on quasi-free individual electrons is the most relev-
+ant gamma photon interaction at medium energies from some 100 keV up to several
+MeV. An incoming photon interacts with an electron at the rest (Fig. 1.4) trans-
+ferring some energy which leads to the increase in photon’s wavelength (Compton
+shift). The electron recoils with a momentum p and kinetic energy Ee at an angle
+                                                                 0
+θe , while a photon scatters at an angle θν with a momentum hν /c.
+   From the momentum and energy conservation one can obtain for electron mo-
+mentum and kinetic energy respectively:
+                                                        0          0
+                                  p2e c2 = h2 (ν 2 + ν 2 − 2νν cosθν )                                 (1.8)
+
+                                                               0
+                                             Ee = h(ν − ν )                                            (1.9)
+
+
+
+                                                                                                          13
+Chapter 1 Introduction
+
+
+  The Compton wavelength shift ∆λ for scattered photon can be calculated from:
+                                   0
+                           ∆λ = λ − λ = λe (1 − cosθν )                        (1.10)
+
+where λe = mhe c is the Compton wavelength of the electron.
+  The Compton shift depends on the scattering angle and attains its maximum
+∆λ = 2λe for back-scattered photons.
+  The angles θe and θν are related by the following equation:
+                                             1              θν
+                              tan θe =                cot                      (1.11)
+                                         1 + mhν
+                                               ec
+                                                  2         2
+
+  The mono-energetic beam of photons undergoing the Compton scattering pro-
+duces scattered photons with a continuous energy distribution in the interval from
+hν(1 + m2hν   −1 for back-scattered photons to hν (if θ = 0) as well as ejected elec-
+            2)                                         ν
+         ec
+trons with a continuum spectrum of kinetic energy (Compton continuum) from 0
+(θν = 0) to Eemax 1.12 known as Compton edge.
+
+                                           me c2 −1
+                             Eemax = hν(1 +      )                         (1.12)
+                                            2hν
+   The cross section of the Compton scattering is directly proportional to Z and
+to the energy of the incoming photons and for low energy photons approaches the
+classical Thomson cross section.
+
+1.4.1.4 Pair production in the field of the nucleus
+High energetic photons lose their energy by e+ e− pair production. The pair pro-
+duction is possible if the energy of the incoming photon exceeds the threshold (eq.
+1.13), which for a massive nucleus (M) is almost equal to 2me , where me c2 = 0.511
+MeV is the rest mass of an electron. To preserve the momentum conservation the
+nucleus has to take away an excessive momentum.
+                                                      me
+                               Eν ≥ 2me c2 (1 +          )                     (1.13)
+                                                      M
+  The kinetic energy of a produced electron as well as that of the positron has a
+continuous distribution in the interval between 0 and Eν − 2me c2 .
+  For not very energetic gamma photons the screening the nucleus electric field
+by the outer electrons can be neglected and the cross section of pair production is
+directly proportional to Z 2 and to the ln(Eν ) of the incoming photon.
+
+
+
+
+14
+                                              1.4 Interaction of particles with matter
+
+
+1.4.1.5 Electromagnetic cascade
+When high energetic photons hit the thick and dense matter they can produce
+electrons and positrons still energetic enough to radiate another photons that in turn
+undergo the Compton scattering or photoelectric effect, producing new electrons.
+This phenomenon is called an electromagnetic cascade.
+   At each step of the cascade more and more secondary particles with the decreasing
+average energy are produced. At some depth called the shower maximum the number
+of created secondary particles as well as the amount of dissipated energy reaches its
+maximum. After this depth the cascade decays slowly. The energy absorption of
+low energy electrons proceeds mainly via collision losses (see 1.4.2) at the constant
+rate per unit length.
+   Due to broad angular distribution of particles in Compton scattering and photo-
+electric effect the cascade spreads in the direction orthogonal to that of the primary
+particle.
+
+1.4.2 Interaction of charged particles with matter
+Charged particles interact with the electrons and nuclei electromagnetically, con-
+tinuously losing the energy and exciting or ionizing the atoms. The energy loss in
+such a process per unit path traveled is described by Bethe-Bloch equation:
+
+                                     dE   4πnZ 2 e4
+                                 −      =           L,                           (1.14)
+                                     dx    me v 2
+where L is the stopping number.
+  When a charged particle collides an electron at rest, an energy transfer occurs
+with the maximum at:
+
+                                   E = me c2 (1 − γ)                             (1.15)
+   The recoiled electron that has enough energy and can also excite and ionize atoms
+is called δ electron.
+   The process at which the charged particles of low energy has the most energy loss
+is ionization. At the higher energies becomes the Bremsstrahlung more important
+interaction.
+   Bremsstrahlung is a radiative energy loss, that occurs if the electrons are deflected
+while interacting with the Coulomb field of the nucleus. As a result the photons at
+a small angle with respect to the electron direction are emitted.
+   For electrons Bremsstrahlung starts to dominate at the energy of tens MeV and
+for given conditions of the simulation the Bremsstrahlung is not an important energy
+loss process.
+
+
+
+
+                                                                                     15
+Chapter 1 Introduction
+
+
+  Low energetic positrons that can not produce heavy particles undergo mostly
+two photons annihilation. After losing all their energy via ionization positrons stop
+and annihilate with electrons producing gamma photons of the same energy. If a
+positron still moves the angular and energy distribution of both photons depends
+on the velocity of the positron.
+
+1.4.3 Optical photons interactions
+The photons in soft UV and optical range (with the energy of 1.5-4.0 eV or the
+wavelength of 300 - 800 nm) created as a result of scintillation undergo also another
+interactions in matter as well as at the surface of different materials. In this case
+they are described as electromagnetic waves.
+   The phase velocity of light in medium vph is lower than that in vacuum. The ratio
+of both velocities gives the refractive index of the material (eq. 1.16).
+                                               c
+                                   n(ν) =                                      (1.16)
+                                            vph (ν)
+In materials with extinction, the waves are damped. Their intensity decreases ex-
+ponentially with the Lambert-Beer’s law (eq. 1.17).
+
+                                    I = I0 e−Kx ,                              (1.17)
+
+where x is the thickness of the layer and K is the extinction constant. The extinction
+length or reciprocal of extinction constant gives the path along that the intensity of
+the light beam decreased to 1/e of its initial value.
+  For such a material one can write a refractive index as a complex number:
+
+                                n(ν) = nr (ν) − iκ(ν)                          (1.18)
+
+   with the imaginary part of it being responsible for the extinction of the waves
+caused by absorption and scattering. The imaginary part of the refractive index is
+related with the extinction constant via the equation 1.19.
+                                            4πκ
+                                     K=         ,                              (1.19)
+                                             λ
+where λ is the wavelength in vacuum.
+   The behavior of the wave at the boundary of two materials depends on the prop-
+erties of the materials. If the materials on both sides of the surface have different
+refractive indices the light beam splits into two partial beams (fig. 1.5): reflected,
+which obeys the law of reflection (eq. 1.21), and refracted one, that follows the
+Snell’s law:
+
+                                       α = α‘ ,                                (1.20)
+
+
+
+16
+                                                          1.4 Interaction of particles with matter
+
+
+
+
+Figure 1.5: Reflection and refraction at the surface of two media. The incident beam I splits into the reflected
+(II) one and the refracted (III) one (from [18]).
+
+
+
+where α is the angle of incidence.
+                                               sinα    nin
+                                                    =                                                   (1.21)
+                                               sinβ   nref r
+
+                                                           nin
+                                              sinαT =                                                   (1.22)
+                                                          nref r
+   The fraction of the wave intensity reflected at the surface or transmitted through it
+can be found from the Fresnel equations 1.23. These equations show the reflectivity
+of the electromagnetic waves polarized parallel E||ref l and perpendicular E⊥ref l to
+the surface [12], [18].
+
+
+                                                      |E||ref l |2
+                                              R|| =
+                                                       |E||in |2
+                                                                                                        (1.23)
+                                                  |E⊥ref l |2
+                                             R⊥ =
+                                                   |E⊥in |2
+
+where:
+                          E||ref l   nref r cosα − nin cosβ   tan(β − α)
+                                   =                        =
+                           E||in     nref r cosα + nin cosβ   tan(β + α)
+                                                                                                        (1.24)
+                          E⊥ref l    nin cosα − nref r cosβ   sin(β − α)
+                                   =                        =
+                          E⊥in       nin cosα + nref r cosβ   sin(β + α)
+
+Although the both R|| and R⊥ change differently with the incident angle, if nref r <
+nin they both are equal to 1 for an angle αT (see eq.1.22), which is called the critical
+angle of total reflection. In this case all incoming waves are reflected.
+
+
+
+                                                                                                            17
+Chapter 1 Introduction
+
+
+1.5 Gamma photons detection
+The probabilistic character of the gamma photons interaction with the matter leads
+to the fact that not all of them are detected: most energetic particle can just go
+through detector without any interaction and even if a gamma photon interacts
+inside of a detector not all it energy will be absorbed and thus detected.
+   A monoenergetic source of gamma photons can produce a energy spectrum dis-
+tributed from 0 to the energy of the particle (fig. 1.6). If a gamma photon undergoes
+photoelectric effect it is completely absorbed by the scintillator material and results
+in full energy peak or photo-peak. The response of the detector by repeated depos-
+ition of the same energy Eγ is not exactly the same, but is distributed about a mean
+value.
+   Gamma photons with initial energy Eγ undergoing Compton scattering can de-
+posit up to Emax (eq. 1.12) in one interaction. The scattered photon still can be
+completely absorbed in a subsequent photoelectric effect which results in photopeak
+[14]. If the scattered photon escapes the detector the deposited energy is distrib-
+uted in Compton continuum that ends with Compton edge, which corresponds to the
+maximum energy transfer in Compton scattering. It is also possible that a photon
+moved through the scintillator without interaction, undergoes Compton scattering
+in a shielding. If the photon back-scattered in the crystal and is then absorbed
+there, it can deposit the energy up to Eγ − Emax . This leads to one more peak (not
+shown) called backscatter peak.
+   In a pair production interaction a gamma photon is also completely absorbed as by
+photoeffect, but one or both 0.511 MeV photons produced by positron annihilation
+still can escape the detector. That is how the single and double escaped peak are
+obtained.
+
+
+
+
+  Figure 1.6: The detected spectrum of a beam of gamma photons with energy Eγ (adapted from [20]).
+
+
+
+
+18
+                           1.6 Gamma and optical photons simulation in GEANT4
+
+
+1.6 Gamma and optical photons simulation in GEANT4
+GEANT4 is a Monte Carlo simulation tool for modeling the interaction of the
+particles with matter. It allows creation of different geometrical setups, choice of
+different particles types and physics processes to be considered.
+   Each primary particle with specified properties is created at the selected position.
+As the particle moves through the volume it is tracked in time and space until it
+stops, decays or leaves the simulated volume. The simulation of particle transport is
+performed step by step [12]. All interactions depends on both material and particles
+properties. GEANT4 allows the usage of the predefined materials from National
+Institute of Standards and Technology (NIST) as well as those created by the users.
+In the last case the exact chemical composition and density as well as a range of
+other parameters are to define.
+   Electromagnetic interactions are described in GEANT4 by different physics model
+dependent on the energy range. The low energy (down to 10 eV) Livermore Model
+includes photoelectric effect, Compton scattering, Rayleigh scattering, gamma con-
+version (pair production), Bremsstrahlung and ionization. The low energy processes
+make direct use of the atomic shell cross section data. Additional sub-package
+implements the atomic de-excitation module like Auger electron emission and fluor-
+escence.
+   The optical processes in GEANT4 deal with the special particle - optical photon
+that is different from the gamma photon. Optical photons are created as as result
+of scintillation, Cherenkov radiation and Wave Length Shifting (WLS). A linear
+polarization is automatically assigned to each photon at the generation process.
+Optical processes are determined by the optical properties of the medium. In order
+to simulate the optical processes those properties should be assigned to the materials
+and the surfaces (at least the refractive index).
+   In GEANT4 simulation an optical photon can undergo Rayleigh scattering, ab-
+sorption and boundary interactions [12]. Bulk absorption just kills the particle.
+The average distance traveled by a photon before being absorbed called absorption
+length and is a material property dependent on the energy of the optical photon.
+The differential cross section of Rayleigh scattering is proportional to 1 + cos(2θ),
+where θ is the scattering angle.
+   At the surface between two materials an optical photon can be reflected, refracted
+or absorbed. The modeling of the light beam splitting is achieved by simulating of
+many photons. The behavior of a photon arriving at the boundary of two media
+(fig. 1.7) will depend on the type of the surface, an incident angle and indices of
+refraction of both materials.
+   The UNIFIED model of GEANT4 describes different reflection mechanisms: the
+specular spike - reflection about the average surface normal, the specular lobe -
+
+
+
+
+                                                                                    19
+Chapter 1 Introduction
+
+
+
+
+                 Figure 1.7: Different types of reflection in GEANT4 (from [13]).
+
+
+
+reflection about the normal of the micro facet, Lambertian or diffuse reflection and
+the back scattering.
+   The micro facets of the rough surface are specified by σα , which is the standard
+deviation of the angle between two normals: the one of the smooth surface and that
+of the local, microscopic surface. Parameter σα doesn’t influence diffuse reflection.
+
+
+
+
+20
+Chapter 2
+Simulation
+2.1 Simulation setup
+This section describes the geometry and the material parameters used in the
+GEANT4 simulation. The simulation setup includes the detector with CeBr3 scin-
+tillator crystal and SiPM at the far end of it as well as the γ photons source.
+
+
+
+
+Figure 2.1: Representation of the simulated detector. The SiPM is cross-hatched, teflon reflector is shown
+in black. Dimensions are given in mm. Left: with cylindrical crystal of 25.4 × 25.4 mm. Right: with
+51 × 51 × 10 mm crystal of quadratic section.
+
+
+  The point-like source of γ photons was placed at a distance of 0.1 mm in front
+of the detector. The simulated beam of 10000 particles had predefined position,
+direction and energy that ranges from 20 keV to 4 MeV.
+  At the different runs of the simulation crystals of round (fig. 2.1 left) or square
+section (fig. 2.1 right) with different size and thickness were used.
+  The scintillator has the 3 mm teflon reflector that covers it from all sides except
+the one with SiPM. The SiPM, situated at the bottom of the CeBr3 crystal is an
+
+
+
+
+                                                                                                       21
+Chapter 2 Simulation
+
+
+ideal one, that absorbs all the optical photons achieved it. The surface between the
+CeBr3 and the SiPM is left completely transparent.
+   For electromagnetic interactions the Livermore package for low energy physics
+with atomic relaxation sub-packages was used.
+   The main CeBr3 optical properties used in the simulation are provided in the
+table 2.1. The complete set of those properties are listed in the appendix (Fig A.1).
+The value of light yield, decay time as well as the emission spectrum were taken
+from the publication [1].
+   The wavelength-dependent attenuation length for LaBr (including absorption and
+scattering length) was used from the paper [6] as no data for CeBr was found.
+
+        Number            Property                       Value                  Units
+          1             Light Yield                        60              photons per keV
+          2             Decay time                         18                    ns
+          3           Refractive index                  1.9 [28]
+          4         Emission range (max)             340-440 (370)                 nm
+
+
+             Table 2.1: Main material properties of CeBr3 as a input of the simulation.
+
+
+  The reflection mechanism between the CeBr3 crystal and the teflon reflector was
+defined with UNIFIED model of GEANT4 [11]. The interface was set as “dielectric-
+dielectric” with “groundbackpainted” or “polishedbackpainted” surface. The table
+2.2 shows the 4 surface descriptions used in simulation. The option D is a configur-
+ation adapted from the study [13].
+  “Polishedbackpainted” as well as “groundbackpainted” optical surfaces consist of
+two interfaces (fig. 2.2 left): crystal-gap and gap-wrapping. In “polishedback-
+painted” optical surface the gap-wrapping interface is supposed to be perfectly
+smooth, only specular spike reflection (by Snell’s law) takes place here. At the
+“groundbackpainted” surface only the Lambertian reflection (cosine distributed)
+takes place at the gap-wrapping interface. The parameter “reflectivity” determ-
+ines the fraction of the optical photons reflected at the gap-wrapping surface. The
+rest is absorbed.
+
+                 Crystal-gap int.        σα      Gap-wrapping int.           reflectivity
+            A          no                 0        Lambertian                    0.97
+            B     specular spike          0        Lambertian                    0.97
+            C     specular spike          0       specular spike                 0.97
+            D      Lambertian            0.6       Lambertian                    0.97
+
+
+           Table 2.2: The different optical interfaces of the reflector used in simulations.
+
+
+
+
+22
+                                                       2.2 Verification of the material properties
+
+
+
+
+Figure 2.2: Left: The schematic representation of optical interfaces in“groundbackpainted” and “polished-
+backpainted” surfaces. Right: Positions of gamma photons source inside of the scintillator.
+
+
+
+2.2 Verification of the material properties
+First the correlation of the simulation results with the materials properties input: the
+emission spectra, the light yield distribution, absorption length for optical photons
+as well as behavior of the optical photons at different surfaces was verified.
+
+2.2.1 Scintillation spectrum
+
+
+
+
+Figure 2.3: The comparison of the simulated spectral distribution of the scintillation emission (the blue line)
+with the simulation input (the red dots). The spectra are normalized by their maximum value.
+
+
+  To check the emission spectrum 10000 photons of 1 MeV were simulated. The
+energy of each of the optical photons created as a result of scintillation was read out
+and plotted in the histogram. In this simulation the cylindrical CeBr3 crystal with a
+
+
+
+
+                                                                                                           23
+Chapter 2 Simulation
+
+
+diameter of 2.54 cm and the thickness of 2.54 cm was used and the source of gamma
+photons was placed in the middle of the crystal (point A on figure 2.2 right).
+  The figure 2.3 compares the simulation input (see fig. A.1 in Appendix) with the
+resulting emission spectrum. The simulated spectrum has a step form, is determined
+between 340 nm and 440 nm with a peak at 370 nm and coincides with the input.
+This shape results while GEANT4 fills the spectrum interval between two provided
+points with the constant mean value of those points.
+
+2.2.2 Gamma photons interactions
+The absorption efficiency of the scintillator depends on the linear attenuation coef-
+ficient of the material µ, whereas the photopeak efficiency depends on the kind of
+gamma photons interaction, that dominates at the certain energy.
+   The figure 2.4 right shows the fraction of different interaction for each energy:
+photoelectric effect, Compton scattering or pair production. Only the first interac-
+tion of each gamma photon is counted and filled into the histogram. For CeBr3 the
+photoelectric effect dominates for incoming gamma photons with the energy up to
+200 keV. That means that one can suppose the photopeak efficiency to be close to
+100% up to this energy (see 3.1).
+
+                                                                                                      photoeffect         compton scattering          pair production
+                                                                                           100                                                                          100
+                                                       probability of given interaction
+
+
+
+
+                                                                                          10 1                                                                          10 1
+
+
+
+
+                                                                                          10 2                                                                          10 2
+
+
+
+                                                                                                 20          50     100     200       500      1000   2000     4000
+                                                                                                                            energy, keV
+
+
+Figure 2.4: Left: The fraction of optical photons produced as a result of scintillation as a function of the
+distance from its front end. Right: Gamma photons interactions dominate at different energies.
+
+
+   The absorption length X0 of γ photons, which is the distance over that the intens-
+ity of the beam is reduced to 1/e of initial, is not an input parameter of the GEANT4
+simulation, but is determined by the chemical composition of the material. It is an
+inverse of the attenuation coefficient (see eq. 1.4) and can be computed from:
+                                                   1     1
+                                           X0 =      = µ                                                                                                              (2.1)
+                                                   µ   ρ ·ρ
+
+
+
+
+24
+                                           2.2 Verification of the material properties
+
+
+where µρ - the mass attenuation coefficient, that for different energies can be found
+in [24]. For a compound material the mass attenuation coefficient can be obtained
+from:
+                                  µ X          µ
+                                    =      wi ( )                                (2.2)
+                                  ρ      i
+                                               ρi
+where wi is the weight fraction of the element i in the compound material.
+  One can compare the depth at which the scintillated optical photons are produced
+with the absorption length of the gamma photons in CeBr3. Of cause it will not be
+the same, as the γ photons from the some energy level are not absorbed completely
+at the first interaction, but they almost coincide for gamma photons with the energy
+up to 100keV. The figure 2.4 left shows the fraction of the optical photons scintillated
+as a function of the path length.
+  The histogram shows the expected exponential behavior. The calculated value of
+X0 (from [24]) for 200 keV γ photons is suppose to be around 1.44 cm, the corres-
+ponding simulated value is about 1.62 cm and thus show no drastically discrepancy.
+  The one more reason why the scintillation depth being crucial is that the amount
+of optical photons achieved the bottom of the scintillator as well as their spatial
+distribution at the output side depends on the path traveled. From the histogram
+on fig. 2.4 left one can suppose wider spatial distribution of the optical photons for
+low energetic gamma photons.
+
+2.2.3 Light yield distribution
+In GEANT4 the light yield is defined as a number of optical photons produced per
+unit energy deposition by a charged particle, that is why simulations with gamma
+photons as well as electrons as incoming particles were performed and compared at
+this step. For the reasons described in 1.5 the light yield for γ photons can be equal
+or less than that for an electron of the same energy.
+                                                                                  0   0
+   In this run the particle gun was also placed in the center of the cylindrical 1 × 1
+scintillator. The normalized frequency νi was calculated as:
+                                            ni
+                                      νi = P                                       (2.3)
+                                            i ni
+where ni is the number of events with the amount of optical photons in range i.
+   The figure 2.5 shows the light yield distribution for electrons and gamma photons
+with energy of 50 keV simulated in center of CeBr3 crystal. The simulated light
+distribution is expected to be Gaussian distributed around the mean light yield
+value (input parameter, 60 optical photons per keV deposited energy). The results
+of the fit show the agreement with this assumption. Simulated in the center of the
+crystal the gamma photons of low energy are completely absorbed and the light
+
+
+
+
+                                                                                     25
+Chapter 2 Simulation
+
+
+
+
+Figure 2.5: The light yield distribution for 50 keV incoming electrons (left) and photons (right) with fitted
+Gaussian distribution.
+
+
+
+yield of the gamma photons nearly coincide with that of the electron of the same
+energy.
+   With the increase of the energy of incoming gamma photon the light yield distri-
+bution comes close to the line from fig. 1.6. The histogram on fig. 2.6 left shows
+the light yield distribution for 2MeV incoming gamma photon. The energy resolu-
+tion that can be determined from the fig. 2.6 right is about 1.3%, which is better
+than 4.3% measured in [1], as the simulation do not includes the signal reduction by
+SiPM.
+
+
+
+
+Figure 2.6: Left: the light yield distribution of the 2MeV gamma photon. Right: The photopeak range of
+the light yield distribution from figure left with FWHM (black line).
+
+
+   The light distribution of the gamma photons lower energy simulated outside of
+the scintillator (fig. 2.7) also shows the difference from those simulated in the center
+of the crystal. As the low energetic gamma photons are absorbed very close to the
+
+
+
+26
+                                                      2.2 Verification of the material properties
+
+
+rand of the crystal the X-ray photons emitted while de-excitation can escaped the
+scintillator, and thus reducing the total light yield of the given gamma photons.
+Gamma photons of 100 keV are absorbed deep enough preventing the escape.
+
+
+
+
+Figure 2.7: The light yield distribution for gamma photons of 20keV (left), 50keV(center) and 100keV (right).
+
+
+
+
+2.2.4 Optical photons bulk absorption
+The optical photons undergo bulk absorption in a material determined by the para-
+meter called absorption length, which is the mean distance traveled by an optical
+photon before being absorbed [11]. The figure 2.8 shows the accumulated number
+of optical photons absorbed up to the distance. It has exponential character and is
+reduced to 1/e of the initial value after the distance equal to the absorption length
+for given energy.
+
+
+
+
+Figure 2.8: Accumulated fraction of absorbed optical photons with E=3.35eV in CeBr3 crystal as a function
+of distance. The red line show the length, at which the beam is reduced to 1/e.
+
+
+
+
+2.2.5 Reflection at different surfaces
+In the next simulation run the reflection at different types of surfaces described in
+2.1 were examined. The beam of 1000 optical photons was simulated inside of the
+CeBr3 crystal and shot towards the surfaces between the CeBr3 crystal and the
+reflector at different incidence angels to the surface normal.
+
+
+
+                                                                                                          27
+Chapter 2 Simulation
+
+
+
+
+                       0                                                    0
+
+
+
+
+                      A                                                     A
+
+
+
+
+                       B                                                    B
+
+
+
+
+                       C                                                    C
+      Figure 2.9: The behavior of the beam of the optical photons at different kinds of surfaces.
+
+
+
+
+28
+                                                        2.2 Verification of the material properties
+
+
+   The figure 2.9 shows the outcomes of these simulations: at the left side the events
+with incidence angle less than the angle of total reflection are represented, at the
+right side - those with incidence angle greater than the angle of total reflection.
+   The fig. 2.9.0 represents the bare CeBr3 crystal. In both cases the beam remains
+thin: all the photons are refracted, if the incidence angle is less than that of total
+reflection and all photons undergo total internal reflection, if the incidence angle is
+greater than the critical angle.
+
+
+
+
+Figure 2.10: Different interactions of optical photons in bare CeBr3 crystal. Dark red shows the optical
+photons that achieve direct the output side of the scintillator, the green part is reflected on the side surface.
+The gray color shows optical photons that escape through the side surface and the dark blue - those absorbed
+inside the scintillator.
+
+
+   The figure 2.10 shows the fraction of the optical photons undergo different inter-
+action in such a crystal. The part of the optical photons reaches the output side
+direct after scintillation increases with the energy, as the gamma photons interact
+deeper in the CeBr3 . The fraction of the optical photons reaches the output side
+after all interaction increases with the energy lightly.
+   The fig. 2.9.A shows the behavior of the photons at the “groundbackpainted”
+surface without a gap. As supposed regardless of the incident angle the beam is
+diffuse reflected. In that case some amount of optical photons are absorbed at the
+interface gap-wrapping (light blue color on fig. 2.11). The total amount of optical
+photons achieve the output side of scintillator is greater than that of the bare crystal
+and is independent on the energy of the incoming gamma photons.
+   The surfaces on the fig. 2.9.B and .C represent the surfaces with two interfaces
+with a gap between them. The beam coming at the angle greater than the critical one
+results in a specular spike reflected at the first interface, but at the second interface
+the “groundbackpainted” causes the Lambertian reflection and the “polishedback-
+
+
+
+                                                                                                             29
+Chapter 2 Simulation
+
+
+
+
+Figure 2.11: Different interactions of optical photons in a CeBr3 crystal with reflector A (left) and B (right).
+
+
+
+painted” in case .C shows the specular spike reflection again. The reflection at the
+first interface allows the part of the optical photons to achieve the second interface,
+reducing the number of optical photons absorbed at the gap-wrapping surface (com-
+pare fig. 2.11 left with 2.11 right and 2.12), but the specular spike reflection reduces
+the total number of optical photons reached the output side of the scintillator.
+   In the case of reflector D diffuse reflection occurs at both interfaces, the total
+number of the optical photons at the output side in this case is maximal.
+
+
+
+
+Figure 2.12: Different interactions of optical photons in a CeBr3 crystal with reflector C (left) and D (right).
+
+
+
+
+30
+Chapter 3
+Results
+3.1 Detection efficiency and photopeak efficiency
+The absorption efficiency and photo-peak efficiency of the CeBr3 crystal for gamma
+photons of different energy were computed from the simulation with 10000 gamma
+photons from the source in front of the scintillators of different shapes and sizes.
+The absorption efficiency was calculated as:
+                                             nc
+                                      AE =                                        (3.1)
+                                             ns
+with ns - the number of gamma photons simulated and nc - the number of simulated
+photons for which at least one optical photon was counted.
+  The photo-peak efficiency or peak-to-total ratio was calculated as:
+                                             nph
+                                     PE =                                         (3.2)
+                                             nc
+with nph - the number of photons, those light yield was in the photopeak.
+
+3.1.1 Detection efficiency of bare CeBr3 crystal
+The absorption efficiency of the cylindrical 1’ x 1’ CeBr3 crystal (fig. 3.1) is equal
+to 100% up to 100keV and decreases drastically with the energy as the absorption
+length X0 grows with the energy of the gamma photon. The increase in the thickness
+of the scintillator for the same energies leads to the increase of the path traveled by
+a photon inside of the crystal and detection efficiency as well.
+   The increase in the surface of CeBr3 crystal in turn (70 x 70 mm against 51 x 51
+mm) doesn’t affect the absorption efficiency for the perpendicular incidence.
+   The photopeak efficiency of the CeBr3 is maximal in the range of 100-500 keV. The
+escape of X-ray while de-ecxitaion of the atoms causes the decrease of the photopeak
+efficiency for gamma photons with energy lower than 100 keV. The gamma photons
+of higher energy interact largely via Compton scattering or pair production and are
+not always completely absorbed in a crystal, which leads to the reduction of the
+photopeak efficiency at such energies.
+
+
+
+                                                                                    31
+Chapter 3 Results
+
+
+
+                                         100                                                            100
+                                          90                                                             80
+                                          80                                                             60
+
+
+
+
+                                                                             Photo-peak efficiency, %
+              Absorption efficiency, %
+                                          70                                                             40
+                                                                                                         30
+                                          60
+                                                                                                         20
+                                          50
+
+                                                    1" x 1"                                                        1" x 1"
+                                          40        2" x 2"                                              10        2" x 2"
+                                                    3" x 3"                                                        3" x 3"
+                                               20   50 100 200 500 1000   4000                                20   50 100 200 500 1000   4000
+                                                          energy, keV                                                    energy, keV
+
+Figure 3.1: Absorption efficiency (left) and photo-peak efficiency (right) for cylindrical CeBr3 crystal of
+different size. The size on the legend are in inches: diameter x thickness.
+
+
+
+  The more thick crystal allows the scattered gamma photons to interact one more
+time (or several times) and raises the probability for such a photon to be completely
+absorbed reducing the energy dispersion. As the Compton scattering has a wide
+angular distribution the photopeak efficiency for gamma photons with energy higher
+than 1 MeV increases slightly with the grows of the area from 51x51 mm (fig. 3.2)
+to 70x70 mm (fig. 3.3).
+
+
+                                         100                                                            100
+                                                                                                         80
+                                          80
+                                                                                                         60
+                                                                             Photo-peak efficiency, %
+              Absorption efficiency, %
+
+
+
+
+                                          60                                                             40
+                                          50                                                             30
+                                          40
+                                                                                                         20
+                                          30
+                                                    5.1 x 5.1 x 1 cm                                               5.1 x 5.1 x 1 cm
+                                                    5.1 x 5.1 x 2 cm                                     10        5.1 x 5.1 x 2 cm
+                                          20        5.1 x 5.1 x 2.54 cm                                            5.1 x 5.1 x 2.54 cm
+                                                    5.1 x 5.1 x 3 cm                                               5.1 x 5.1 x 3 cm
+                                               20   50 100 200 500 1000   4000                                20   50 100 200 500 1000   4000
+                                                          energy, keV                                                    energy, keV
+
+Figure 3.2: Absorption efficiency (left) and photo-peak efficiency (right) for quadratic 5.1 x 5.1 cm CeBr3
+crystal of different thickness. The size on the legend are in cm.
+
+
+  Compared with the other scintillators CeBr3 has a prominent absorption as well
+as a photo-peak efficiency (fig. 3.4).
+
+
+
+
+32
+                                                                           3.1 Detection efficiency and photopeak efficiency
+
+
+
+                                          100                                                               100
+                                                                                                             80
+                                           80
+                                                                                                             60
+
+
+
+
+                                                                                 Photo-peak efficiency, %
+               Absorption efficiency, %
+
+
+                                           60
+                                                                                                             40
+                                           50
+                                                                                                             30
+                                           40
+                                                                                                             20
+                                           30
+                                                     7.0 x 7.0 x 1 cm                                                  7.0 x 7.0 x 1 cm
+                                                     7.0 x 7.0 x 2 cm                                        10        7.0 x 7.0 x 2 cm
+                                           20        7.0 x 7.0 x 2.54 cm                                               7.0 x 7.0 x 2.54 cm
+                                                     7.0 x 7.0 x 3 cm                                                  7.0 x 7.0 x 3 cm
+                                                20   50 100 200 500 1000      4000                                20   50 100 200 500 1000   4000
+                                                           energy, keV                                                       energy, keV
+
+Figure 3.3: Absorption efficiency (left) and photo-peak efficiency (right) for quadratic 7.0 x 7.0 cm CeBr3
+crystal of different thickness. The size on the legend are in cm.
+
+
+
+
+Figure 3.4: The absorption efficiency (left) and photo-peak efficiency (right) for different cylindrical 1’ x 1’
+scintillators including CeBr3 (adapted from [4]).
+
+
+
+3.1.2 Effect of the encapsulation of the crystal and the direction of the
+      incoming gamma photons
+The figure 3.5 left shows the absorption efficiency for 51 x 51 x 10 mm CeBr3
+scintillator for different incidental angles to the normal. As the inclined trajectory
+elongates the path, that a gamma photon can travel inside the scintillator, the
+detection efficiency increases with the angle. The photo-peak efficiency shows no
+dependence on the incidental angle of the incoming gamma photon.
+   In the setup with the reflector around the scintillator the source of the photons
+was moved and placed in front of the reflector. For both 10 and 20 mm thick
+scintillators there is a small gain of efficiency for the most energetic gamma photons
+due to elongation of the path that photons pass through the crystal. On the other
+hand the gamma photons of lower energy can already be absorbed inside of the
+front reflector and never reach the scintillator, reducing the absorption efficiency
+
+
+
+                                                                                                                                                    33
+Chapter 3 Results
+
+
+
+
+Figure 3.5: Absorption (left) and photo-peak (right) efficiency for quadratic 51 x 51 x 10 mm CeBr3 crystal
+for different incidental angles.
+
+
+
+for gamma photons with energy lower than 100 keV. However the presence of the
+reflector does not change the photo-peak efficiency noticeably.
+
+
+                                    100                                                                              100
+                                                                                                                      80
+                                     80
+                                                                                                                      60
+                                                                                                                      50
+                                     60                                                                               40
+                                                                                             Photo-peak efficiency
+            Absorption efficiency
+
+
+
+
+                                     50                                                                               30
+                                     40
+                                                                                                                      20
+                                     30
+
+                                               51 x 51 x 10, without reflector                                        10        51 x 51 x 10, without reflector
+                                     20        51 x 51 x 10, reflector A                                                        51 x 51 x 10, reflector A
+                                               51 x 51 x 20, without reflector                                                  51 x 51 x 20, without reflector
+                                               51 x 51 x 20, reflector A                                                        51 x 51 x 20, reflector A
+                                          20       50     100    200       500 1000   4000                                 20       50     100    200       500 1000   4000
+                                                                 energy, keV                                                                      energy, keV
+
+
+Figure 3.6: Absorption (left) and photo-peak (right) efficiency for quadratic 51 x 51 x 10 and 51 x 51 x 20
+mm CeBr3 crystal with and without reflector. The size on the legend are in mm.
+
+
+
+
+3.2 Light distribution at the bottom of the scintillator
+3.2.1 Light distribution at the bottom of the bare crystal
+The small depth of gamma photons interaction causes the wide spreading of the
+optical photons at the output side of the scintillator for 20-100 keV gamma photons.
+The figure 3.7 left shows the X-axis distribution of the optical photons at the bottom
+of the 51 x 51 x 10 mm CeBr3 crystal. The gamma photons of higher energy
+interact deeper, producing sharp illumination in the center of the crystal, allowing
+reconstruction of the interaction position. This effect is even enhanced in the case
+of the 2 cm thick scintillator (fig. 3.7 right), as the optical photons has to pass
+
+
+
+34
+                                                                                    3.2 Light distribution at the bottom of the scintillator
+
+
+through more material. In this case the gamma photons with energy less than 100
+keV produce homogeneous illumination on the output side of the scintillator.
+                                                          51 x 51 x 10 mm                                                                                     51 x 51 x 20 mm
+                                            0.010
+                                                                                 20 - 100 keV
+                                                                                 200, 500 keV
+                                                                                 1000 -4000 keV                                             0.006
+                                            0.008
+
+
+
+
+                                                                                                      Frequency distribution along x-axis
+      Frequency distribution along x-axis
+
+
+
+
+                                                                                                                                            0.005
+
+                                            0.006                                                                                           0.004
+
+                                                                                                                                            0.003
+                                            0.004
+
+                                                                                                                                            0.002
+                                            0.002
+                                                                                                                                            0.001        20 - 100 keV           1000 keV
+                                                                                                                                                         200 keV                500 - 4000 keV
+                                            0.000                                                                                           0.000
+                                                    20   10        0        10        20                                                            20       10            0        10           20
+                                                                x, mm                                                                                                   x, mm
+
+
+Figure 3.7: The X-axis distribution of the optical photons at the output side of the scintillator for 51 x 51 x
+10 mm (left) and 51 x 51 x 20 mm (right) CeBr3 crystal.
+
+
+   At the same time the height of the peak for high energy gamma photons diminishes
+as more of them can interact at a lower depth (see fig. 2.4). So the peak of the 200
+keV gamma photons decreases significantly as more than 90% of all gamma photons
+of this energy are absorbed within the 2 cm layer of CeBr3 .
+
+
+
+
+Figure 3.8: The fractions of optical photons undergo different interaction in a quadratic 51 x 51 x 10 mm
+(left) and 51 x 51 x 20 mm (right) CeBr3 crystal for different energies of incoming gamma photons. The
+gray color shows, how much optical photons escape the scintillator through the lateral side. The dark rose
+share is those optical photons, that achieve the output side direct after the scintillation, while the light rose
+- those after one or more internal reflections. The dark blue line shows the fraction of the optical photons
+absorbed in the crystal direct after the scintillation, while the light blue one - those after one or more internal
+reflections.
+
+
+   The energy of the incoming gamma photons and the depth of interaction respect-
+ively does not have a large impact on the fraction of the optical photons absorbed
+
+
+
+                                                                                                                                                                                                      35
+Chapter 3 Results
+
+
+inside of the 1 or 2 cm thick CeBr3 crystal, as the absorption length for optical
+photons in CeBr3 is in the range of 10-15 cm (fig. A.1) or on the part of the optical
+photons escaped through the lateral surface in the absence of the reflector. The
+thickness of the scintillator does influence both values (fig. 3.8).
+  The figures A.2 - A.5 show the spatial distribution of the optical photons density
+(per 1 gamma photon per cm2 ) at the output side of the bare CeBr3 crystal. The
+number of photons achieve the bottom of the scintillator increases proportional to
+the energy of the incoming gamma photons and decreases with the thickness of the
+crystal.
+
+
+
+
+Figure 3.9: The total number of the optical photons (per a gamma photon) at the output side of scintillator
+for the 51 x 51 x 10 mm and 51 x 51 x 20 mm bare CeBr3 crystal.
+
+
+   The fig. 3.9 shows the total number of optical photons achieved the bottom of
+the scintillator. For lower energy gamma photons more optical photons are seen
+for a thin crystal, but from 200 keV the thicker scintillator will have the brighter
+illumination of the output side.
+
+3.2.2 Effect of the the direction of the incoming gamma photons
+
+
+                                                                              20 - 50 keV
+                                Frequency distribution along x-axis
+
+
+
+
+                                                                      0.005   100 keV
+                                                                              200 keV
+                                                                      0.004   500 - 4000 keV
+
+                                                                      0.003
+
+                                                                      0.002
+
+                                                                      0.001
+
+                                                                      0.000
+                                                                              20     10       0    10   20
+                                                                                           x, mm
+
+Figure 3.10: The X-axis distribution of the optical photons at the output side of the scintillator for 51 x 51
+x 10 mm CeBr3 crystal for different incident angles.
+
+
+
+
+36
+                                                                                   3.2 Light distribution at the bottom of the scintillator
+
+
+  The incident angle of the incoming gamma photons has no effect on the spatial
+distribution at very low energies, but starting from 100 keV the profile ceases being
+symmetric any more (see fig. 3.10 and A.10).
+
+3.2.3 Effect of the reflector
+The addition of the reflector smooths the peak of the profile for high energy gamma
+photons and raises it for gamma photons of low energy (fig. 3.11). The larger area
+of the output side causes the spreading the optical photons at the corners (fig. 3.12),
+but does not affect drastically the distribution in the center.
+                                                         51 x 51 x 10 mm
+
+                                                                                                                                          0.005                     20-50 keV
+
+
+                                                                                                    Frequency distribution along x-axis
+                                                                            20 - 100 keV
+                                                                            200, 4000 keV
+                                                                                                                                                                    200
+                                           0.008
+                                                                            500, 1000, 2000 keV                                                                     500 - 4000 keV
+                                           0.007                                                                                          0.004
+     Frequency distribution along x-axis
+
+
+
+
+                                           0.006
+                                                                                                                                          0.003
+                                           0.005
+
+                                           0.004
+                                                                                                                                          0.002
+                                           0.003
+
+                                           0.002                                                                                          0.001
+                                           0.001
+                                                                                                                                          0.000
+                                           0.000                                                                                                  20   10      0    10     20
+                                                   20   10        0
+                                                               x, mm
+                                                                           10        20                                                                     x, mm
+
+Figure 3.11: The X-axis distribution of the optical photons at the output side of the scintillator for 51 x 51
+x 10 mm (left) and 51 x 51 x 20 mm (right) CeBr3 crystal with reflector A.
+
+
+
+
+Figure 3.12: The X-axis distribution of the optical photons at the output side of the scintillator for 70 x 70
+x 10 mm (left) and 70 x 70 x 20 mm (right) CeBr3 crystal with reflector A.
+
+
+  The usage of the reflector results in that the fraction of the optical photons at
+the output side is not influenced by the energy of the gamma photon any more (fig.
+3.13), but the right choice of the reflector can increase this fraction.
+
+
+
+
+                                                                                                                                                                                     37
+Chapter 3 Results
+
+
+  The figures A.6 - A.9 show the spatial distribution of the optical photons density
+at the output side of the CeBr3 crystals with reflector A. The number of photons
+achieve the bottom of the scintillator increases proportional to the energy of the
+incoming gamma photons and decreases with the thickness of the crystal again.
+The figures A.11 compared the spatial distribution for scintillator with reflectors A
+and D: those look the same.
+
+
+
+
+Figure 3.13: The fractions of optical photons undergo different interaction in a quadratic 51 x 51 x 10 mm
+CeBr3 crystal with different kinds of reflector for different energies of incoming gamma photons. The gray
+color shows, how much optical photons escape the scintillator through the lateral side. The dark rose share
+is those optical photons, that achieve the output side direct after the scintillation, while the light rose -
+those after one or more internal reflections. The dark blue line shows the fraction of the optical photons
+absorbed in the crystal direct after the scintillation, while the light blue one - those after one or more internal
+reflections.
+
+
+
+
+38
+                                     3.2 Light distribution at the bottom of the scintillator
+
+
+   The fig. 3.14 compares the total number of optical photons achieved the output
+side of the scintillator for different sizes with and without reflector. The usage of
+the reflector (A in this case) increases the illumination of the output side of the
+scintillator for both 1 and 2 cm thick crystals at all energies. In contrast to the
+case of bare CeBr3 where the thicker crystal has the brighter illumination of the
+output side for gamma photons of more than 200 keV, in case of the crystal with
+reflector the 1 cm CeBr3 provides brighter (or the same) illumination at the bottom
+of scintillator independent on energy of the gamma photon.
+
+
+
+
+Figure 3.14: The total number of the optical photons (per a gamma photon) at the output side of scintillator
+for the 51 x 51 x 10 mm and 51 x 51 x 20 mm CeBr3 crystal with and without reflector.
+
+
+   The table 3.1 gives the evaluated spatial resolution for gamma photons of some
+energy in CeBr3 crystal of different sizes with and without reflector. Compared to
+[26] the position resolution for gamma photons of middle energy (500 keV in simu-
+lation and 356 keV in [26]) gives comparable outcome. For the position resolution
+at lower energy (<100 keV in simulation and 81 keV in [26]) the simulation shows
+worse values.
+
+   Crystal size, mm         FWHM (< 100keV)              FWHM (500keV)             FWHM (1MeV)
+     51 x 51 x 10               20 mm                        4 mm                    3.2 mm
+     51 x 51 x 20                  -                        4.8 mm                   3.6 mm
+    51 x 51 x 10 R             14.8 mm                       6 mm                    4.2 mm
+    51 x 51 x 20 R              28 mm                       8.4 mm                   7.2 mm
+
+
+Table 3.1: The position resolution in x-direction (FWHM) for different CeBr3 crystal for gamma photons of
+lower than 100 keV, 500 keV and 1 MeV.
+
+
+
+
+                                                                                                         39
+Chapter 4
+Conclusions and perspectives
+The developed GEANT4 simulation includes evaluation of the absorption and pho-
+topeak efficiency of the CeBr3 crystal as well as the tracking of the scintillated
+optical photons inside of the crystal. The simulated experimental setup provides
+several models of reflection on the CeBr3 crystal surfaces.
+   The simulation confirms that CeBr3 scintillator has a very good absorption ef-
+ficiency comparable with that of Ge detector for gamma photons in a range from
+20 keV to 4 MeV as well as photopeak efficiency inferior only to BGO detector.
+Both figures grow predicatively with the thickness of the crystal, but are almost
+independent on the surface area. Only for gamma photons with energy exceeding 2
+MeV the increase in area leads to the gain of the photopeak efficiency.
+   The energy resolution obtained from the simulation is much better compared with
+the measurement from [1]. That means, that a more precise simulation setup with
+detailed description of the crystal encapsulation, as well as optical interface at the
+bottom of the scintillator and SiPM is required.
+   The fraction of the optical photons, arriving at the output side of the scintillator
+almost do not depend on the energy of the incoming gamma photons and the usage
+of reflector completely hides it away. The gain in the number of optical photons
+achieving the bottom of the CeBr3 crystal due to reflector application reaches about
+20% and the right choice of the reflecting model can affect the output illumina-
+tion within 5-8%. The model with diffuse Lambertian reflection on both interfaces
+reflection turns to be the most effective.
+   The spatial distribution of the illumination of the output side depends on the
+energy of the incoming gamma photon: at low energies up to 100 keV the distribution
+is a Gaussian-like, flattening with the thickness of the scintillator. The gamma
+photons of higher energy give the peak-shaped distribution of the illumination at
+the bottom of the scintillator.
+   The estimated localization resolution of the CeBr3 crystal turned out to be lower
+than that measured in [26], where the CeBr3 of the smaller surface was studied.
+In current simulation the self-absorption and re-emission of the optical photons in
+CeBr3 crystal were not implemented. Taking those processes in account can change
+
+
+
+
+40
+the spatial distribution of the illumination of the output side, as the re-emission
+occur isotropically [1].
+
+
+
+
+                                                                                41
+     Appendices
+
+
+
+
+42
+Appendix A
+
+
+
+
+44
+Figure A.1: The complete list of material properties of CeBr3 as an input for the simulation.
+
+
+
+
+                                                                                                45
+Appendix A
+
+
+                  20 keV gamma photons
+                                                                           20 gamma photons
+                                              100000
+                                              50000       0.0035
+        20
+                                              20000       0.0030
+                                              10000
+        10                                    5000        0.0025
+                                              2000        0.0020
+         0                                    1000
+                                              500         0.0015
+        10                                    200
+                                                          0.0010
+                                              100
+                                              50          0.0005
+        20                                    20
+                                              10          0.0000
+                                                                    20    10      0       10   20
+             20    10     0     10       20
+
+                  50 keV gamma photons
+                                                                           50 gamma photons
+                                              100000
+                                              50000       0.0035
+        20
+                                              20000       0.0030
+                                              10000
+        10                                    5000        0.0025
+                                              2000        0.0020
+         0                                    1000
+                                              500         0.0015
+        10                                    200
+                                                          0.0010
+                                              100
+                                              50          0.0005
+        20                                    20
+                                              10          0.0000
+                                                                    20    10      0       10   20
+             20    10     0     10       20
+
+                  100 keV gamma photons
+                                                                          100 gamma photons
+                                              100000
+                                                          0.0040
+        20                                    50000
+                                              20000       0.0035
+                                              10000       0.0030
+        10                                    5000
+                                                          0.0025
+                                              2000
+         0                                    1000        0.0020
+                                              500
+                                                          0.0015
+        10                                    200
+                                              100         0.0010
+                                              50          0.0005
+        20                                    20
+                                              10          0.0000
+                                                                    20    10      0       10   20
+             20    10     0     10       20
+
+                  200 keV gamma photons
+                                                                          200 gamma photons
+                                              100000
+                                              50000        0.008
+        20
+                                              20000        0.007
+                                              10000
+        10                                                 0.006
+                                              5000
+                                              2000         0.005
+         0                                    1000         0.004
+                                              500
+                                                           0.003
+        10                                    200
+                                              100          0.002
+                                              50           0.001
+        20                                    20
+                                              10           0.000
+                                                                    20    10      0       10   20
+             20    10     0     10       20
+
+
+Figure A.2: The spatial distribution of the density (per cm2 ) of the optical photons arrived at the output
+side of the 51 x 51 x 10 mm CeBr3 scintillator per gamma photon of 20 - 200 keV.
+
+
+
+
+46
+                  500 keV gamma photons
+                                                                          500 gamma photons
+                                            100000
+        20                                  50000
+                                                           0.007
+                                            20000
+                                            10000          0.006
+        10                                  5000           0.005
+                                            2000
+         0                                  1000           0.004
+                                            500            0.003
+        10                                  200
+                                            100            0.002
+                                            50             0.001
+        20                                  20
+                                            10             0.000
+                                                                    20    10      0       10   20
+             20     10    0     10     20
+
+                  1000 keV gamma photons
+                                            100000
+        20                                  50000
+                                            20000
+                                            10000
+        10                                  5000
+                                            2000
+         0                                  1000
+                                            500
+        10                                  200
+                                            100
+                                            50
+        20                                  20
+                                            10
+             20     10    0     10     20
+
+                  2000 keV gamma photons
+                                                                          2000 gamma photons
+                                            100000         0.010
+        20                                  50000
+                                            20000          0.008
+                                            10000
+        10                                  5000
+                                                           0.006
+                                            2000
+         0                                  1000
+                                            500            0.004
+        10                                  200
+                                            100            0.002
+                                            50
+        20                                  20
+                                            10             0.000
+                                                                    20    10      0       10   20
+             20     10    0     10     20
+
+                  4000 keV gamma photons
+                                                                          4000 gamma photons
+                                            100000
+        20                                  50000
+                                            20000          0.008
+                                            10000
+        10                                  5000
+                                                           0.006
+                                            2000
+         0                                  1000
+                                            500            0.004
+
+        10                                  200
+                                            100            0.002
+                                            50
+        20                                  20
+                                            10             0.000
+                                                                    20    10      0       10   20
+             20     10    0     10     20
+
+
+Figure A.3: The spatial distribution of the density (per cm2 ) of the optical photons arrived at the output
+side of the 51 x 51 x 10 mm CeBr3 scintillator per gamma photon of 500 keV - 4 MeV.
+
+
+
+                                                                                                        47
+Appendix A
+
+
+                                              20 keV gamma photons
+
+              20                                     50000    0.0200
+                                                     20000    0.0175
+                                                     10000
+              10                                     5000     0.0150
+                                                     2000     0.0125
+              0                                      1000
+                                                              0.0100
+                                                              0.0075
+              10
+                                                     100      0.0050
+              20                                              0.0025
+                                                     10       0.0000
+                   20   10    0    10   20                             20   10   0   10   20
+                                              50 keV gamma photons
+
+              20                                     50000    0.0200
+                                                     20000    0.0175
+                                                     10000
+              10                                     5000     0.0150
+                                                     2000     0.0125
+              0                                      1000
+                                                              0.0100
+                                                              0.0075
+              10
+                                                     100      0.0050
+              20                                              0.0025
+                                                     10       0.0000
+                   20   10    0    10   20                             20   10   0   10   20
+                                              100 keV gamma photons
+
+              20                                      50000
+                                                            0.020
+                                                      20000
+                                                      10000
+              10                                      5000 0.015
+                                                      2000
+               0                                      1000
+                                                            0.010
+              10
+                                                      100     0.005
+              20
+                                                      10      0.000
+                   20    10   0    10    20                            20   10   0   10   20
+                                              200 keV gamma photons
+                                                      50000   0.035
+              20
+                                                      20000   0.030
+                                                      10000
+              10                                      5000    0.025
+                                                      2000    0.020
+               0                                      1000
+                                                              0.015
+              10                                              0.010
+                                                      100
+
+              20                                              0.005
+
+                                                      10      0.000
+                   20    10   0    10    20                            20   10   0   10   20
+
+Figure A.4: The spatial distribution of the density (per cm2 ) of the optical photons arrived at the output
+side of the 51 x 51 x 20 mm CeBr3 scintillator per gamma photon of 20 - 200 keV.
+
+
+
+
+48
+                                              500 keV gamma photons
+                                                             0.05
+               20                                      50000
+                                                       20000 0.04
+                                                       10000
+               10                                      5000
+                                                       2000 0.03
+               0                                       1000
+                                                             0.02
+               10
+                                                       100
+                                                             0.01
+               20
+                                                       10    0.00
+                    20   10    0    10   20                            20   10   0   10   20
+                                              1000 keV gamma photons
+
+              20                                       50000
+                                                       20000 0.05
+                                                       10000
+              10                                       5000 0.04
+                                                       2000
+               0                                       1000 0.03
+
+                                                             0.02
+              10
+                                                       100
+                                                             0.01
+              20
+                                                       10    0.00
+                    20   10   0     10   20                            20   10   0   10   20
+                                              2000 keV gamma photons
+                                                             0.06
+              20                                       50000
+                                                       20000 0.05
+                                                       10000
+              10                                       5000 0.04
+                                                       2000
+               0                                       1000 0.03
+
+              10                                             0.02
+                                                       100
+                                                             0.01
+              20
+                                                       10    0.00
+                    20   10    0    10   20                            20   10   0   10   20
+                                              4000 keV gamma photons
+
+              20                                       50000
+                                                       20000 0.05
+                                                       10000
+              10                                       5000 0.04
+                                                       2000
+               0                                       1000 0.03
+
+              10                                             0.02
+                                                       100
+                                                             0.01
+              20
+                                                       10    0.00
+                    20   10   0     10   20                            20   10   0   10   20
+
+Figure A.5: The spatial distribution of the density (per cm2 ) of the optical photons arrived at the output
+side of the 51 x 51 x 20 mm CeBr3 scintillator per gamma photon of 500 keV - 4 MeV.
+
+
+
+
+                                                                                                        49
+Appendix A
+
+
+                                              20 keV gamma photons
+                                                      10000
+              20
+                                                              0.004
+              10                                      1000
+                                                              0.003
+               0
+                                                              0.002
+              10                                      100
+                                                              0.001
+              20
+                                                      10      0.000
+                   20    10   0    10    20                           20   10   0   10   20
+                                              50 keV gamma photons
+                                                      10000
+              20
+                                                              0.004
+
+              10                                      1000
+                                                              0.003
+               0
+                                                              0.002
+              10                                      100
+                                                              0.001
+              20
+                                                      10      0.000
+                   20    10   0    10    20                           20   10   0   10   20
+                                              100 keV gamma photons
+                                                      10000
+              20
+                                                              0.004
+              10                                      1000
+                                                              0.003
+               0
+                                                              0.002
+              10                                      100
+                                                              0.001
+              20
+                                                      10      0.000
+                   20    10   0    10    20                           20   10   0   10   20
+                                              200 keV gamma photons
+                                                      10000
+              20                                              0.007
+                                                              0.006
+              10                                      1000    0.005
+               0                                              0.004
+                                                              0.003
+              10                                      100
+                                                              0.002
+
+              20                                              0.001
+                                                      10      0.000
+                   20    10   0    10    20                           20   10   0   10   20
+
+Figure A.6: The spatial distribution of the density (per cm2 ) of the optical photons arrived at the output
+side of the 51 x 51 x 10 mm CeBr3 scintillator with reflector A per gamma photon of 20 - 200 keV.
+
+
+
+
+50
+                                              500 keV gamma photons
+                                                      10000
+              20                                              0.008
+                                                              0.007
+              10                                      1000    0.006
+                                                              0.005
+               0
+                                                              0.004
+                                                      100     0.003
+              10
+                                                              0.002
+              20                                              0.001
+                                                      10      0.000
+                   20    10   0    10    20                            20   10   0   10   20
+                                              1000 keV gamma photons
+                                                      10000
+              20                                              0.008
+                                                              0.007
+              10                                      1000    0.006
+                                                              0.005
+               0
+                                                              0.004
+
+              10                                      100     0.003
+                                                              0.002
+              20                                              0.001
+                                                      10      0.000
+                   20    10   0    10    20                            20   10   0   10   20
+                                              2000 keV gamma photons
+                                                      10000
+              20                                              0.008
+                                                              0.007
+              10                                      1000    0.006
+                                                              0.005
+               0
+                                                              0.004
+
+              10                                      100     0.003
+                                                              0.002
+              20                                              0.001
+                                                      10      0.000
+                   20    10   0    10    20                            20   10   0   10   20
+                                              4000 keV gamma photons
+                                                      10000 0.008
+              20
+                                                              0.007
+                                                              0.006
+              10                                      1000
+                                                              0.005
+               0                                              0.004
+
+                                                      100     0.003
+              10
+                                                              0.002
+              20                                              0.001
+                                                      10      0.000
+                   20    10   0    10    20                            20   10   0   10   20
+
+Figure A.7: The spatial distribution of the density (per cm2 ) of the optical photons arrived at the output
+side of the 51 x 51 x 10 mm CeBr3 scintillator with reflector A per gamma photon of 500 keV - 4 MeV.
+
+
+
+
+                                                                                                        51
+Appendix A
+
+
+                                              20 keV gamma photons
+                                                     100000
+                                                     50000
+              20
+                                                     20000    0.0025
+                                                     10000
+              10                                     5000     0.0020
+                                                     2000
+               0                                     1000     0.0015
+                                                     500
+                                                     200      0.0010
+              10
+                                                     100
+                                                     50       0.0005
+              20
+                                                     20
+                                                     10       0.0000
+                   20    10   0    10    20                            20   10   0   10   20
+                                              50 keV gamma photons
+                                                     100000
+                                                     50000
+              20
+                                                              0.0025
+                                                     20000
+                                                     10000
+              10                                     5000     0.0020
+
+                                                     2000
+               0                                     1000     0.0015
+                                                     500
+                                                     200      0.0010
+              10
+                                                     100
+                                                     50       0.0005
+              20
+                                                     20
+                                                     10       0.0000
+                   20    10   0    10    20                            20   10   0   10   20
+                                              100 keV gamma photons
+                                                     100000
+                                                     50000
+              20
+                                                              0.0025
+                                                     20000
+                                                     10000
+              10                                     5000     0.0020
+
+                                                     2000
+               0                                     1000     0.0015
+                                                     500
+                                                     200      0.0010
+              10
+                                                     100
+                                                     50       0.0005
+              20
+                                                     20
+                                                     10       0.0000
+                   20    10   0    10    20                            20   10   0   10   20
+                                              200 keV gamma photons
+                                                     100000
+                                                     50000
+              20                                              0.0035
+                                                     20000
+                                                     10000    0.0030
+              10                                     5000
+                                                              0.0025
+                                                     2000
+               0                                     1000     0.0020
+                                                     500
+                                                              0.0015
+              10                                     200
+                                                     100      0.0010
+                                                     50
+              20                                              0.0005
+                                                     20
+                                                     10       0.0000
+                   20    10   0    10    20                            20   10   0   10   20
+
+
+Figure A.8: The spatial distribution of the density (per cm2 ) of the optical photons arrived at the output
+side of the 51 x 51 x 20 mm CeBr3 scintillator with reflector A per gamma photon of 20 - 200 keV.
+
+
+
+
+52
+                                              500 keV gamma photons
+                                                      100000   0.005
+                                                      50000
+              20
+                                                      20000
+                                                               0.004
+                                                      10000
+              10                                      5000
+                                                      2000     0.003
+               0                                      1000
+                                                      500
+                                                               0.002
+              10                                      200
+                                                      100
+                                                      50       0.001
+              20
+                                                      20
+                                                      10       0.000
+                   20    10   0     10   20                            20   10   0   10   20
+                                              1000 keV gamma photons
+                                                      100000
+                                                      50000
+              20
+                                                               0.005
+                                                      20000
+                                                      10000
+              10                                      5000     0.004
+
+                                                      2000
+               0                                      1000     0.003
+                                                      500
+                                                      200      0.002
+              10
+                                                      100
+                                                      50       0.001
+              20
+                                                      20
+                                                      10       0.000
+                   20    10   0     10   20                            20   10   0   10   20
+                                              2000 keV gamma photons
+                                                      100000
+                                                      50000
+              20
+                                                               0.005
+                                                      20000
+                                                      10000
+              10                                      5000     0.004
+
+                                                      2000
+               0                                      1000     0.003
+                                                      500
+                                                      200      0.002
+              10
+                                                      100
+                                                      50       0.001
+              20
+                                                      20
+                                                      10       0.000
+                   20    10   0     10   20                            20   10   0   10   20
+                                              4000 keV gamma photons
+                                                      100000
+                                                      50000    0.005
+              20
+                                                      20000
+                                                      10000    0.004
+              10                                      5000
+                                                      2000     0.003
+               0                                      1000
+                                                      500
+                                                               0.002
+              10                                      200
+                                                      100
+                                                      50       0.001
+              20
+                                                      20
+                                                      10       0.000
+                   20    10   0     10   20                            20   10   0   10   20
+
+
+Figure A.9: The spatial distribution of the density (per cm2 ) of the optical photons arrived at the output
+side of the 51 x 51 x 20 mm CeBr3 scintillator with reflector A per gamma photon of 500 keV - 4 MeV.
+
+
+
+
+                                                                                                        53
+Appendix A
+
+                                           20 keV gamma photons
+                                                 100000
+           20                                    50000     0.0035
+                                                 20000     0.0030
+                                                 10000
+           10                                    5000      0.0025
+                                                 2000      0.0020
+            0                                    1000
+                                                 500       0.0015
+           10                                    200
+                                                 100       0.0010
+                                                 50        0.0005
+           20                                    20
+                                                 10        0.0000
+                 20        0          20                             20    10     0     10    20
+                                           200 keV gamma photons
+                                                  100000
+           20                                     50000    0.004
+                                                  20000
+                                                  10000
+           10                                     5000     0.003
+                                                  2000
+            0                                     1000     0.002
+                                                  500
+           10                                     200
+                                                  100      0.001
+                                                  50
+           20                                     20
+                                                  10       0.000
+                 20         0         20                            20     10    0     10     20
+                                        1000 keV gamma photons
+                                                  100000
+           20                                     50000    0.006
+                                                  20000
+                                                  10000    0.005
+           10                                     5000
+                                                  2000     0.004
+            0                                     1000     0.003
+                                                  500
+           10                                     200      0.002
+                                                  100
+                                                  50       0.001
+           20                                     20
+                                                  10       0.000
+                 20         0         20                            20     10    0     10     20
+                                        4000 keV gamma photons
+                                                  100000
+           20                                     50000
+                                                  20000    0.005
+                                                  10000
+           10                                     5000     0.004
+                                                  2000
+            0                                     1000     0.003
+                                                  500
+           10                                     200      0.002
+                                                  100
+                                                  50       0.001
+           20                                     20
+                                                  10       0.000
+                 20         0         20                            20     10    0     10     20
+Figure A.10: The spatial distribution of the density (per cm2 ) of the optical photons arrived at the output
+side of the 51 x 51 x 10 mm CeBr3 scintillator if gamma photons are shot at 50◦ to the normal (per gamma
+photon of 20 keV, 200 keV, 1MeV and 4 MeV).
+
+
+54
+Figure A.11: The spatial distribution of the density (per cm2 ) of the optical photons arrived at the output
+side of the 51 x 51 x 10 mm CeBr3 scintillator with reflector A (left) and D (right) (per gamma photon of
+20 keV, 100 keV, 1MeV and 4 MeV).
+
+
+
+
+                                                                                                         55
+References
+[1]   F.G.A.Quarati et al. Scintillation and detection characteristics of high-
+      sensitivity CeBr3 gamma-ray spectrometers. In: Nuclear Instruments and
+      Methods in Physics Research A (2013).
+[2]   J.Greiner et al. Considerations for a spectrometer for POLAR-2.
+[3]   P. Bloser et al. Advanced Scintillators and Readout Devices for High-Energy
+      Astronomy. 2010.
+[4]   Peter F. Bloser et al. The Advanced Scintillator Compton Telescope (ASCOT)
+      balloon project. In: Space Telescopes and Instrumentation 2016: Ultraviolet to
+      Gamma Ray. Ed. by Jan-Willem A. den Herder, Tadayuki Takahashi and
+      Marshall Bautz. 2016, pp. 1919–1925. doi: 10.1117/12.2233230.
+[5]   Thomas Carlson. Photoelectron and Auger Spectroscopy. Springer US, 1975.
+      doi: 10.1007/978-1-4757-0118-0.
+[6]   Herman Dam et al. Optical Absorption Length, Scattering Length, and Refract-
+      ive Index of LaBr3:Ce3+. In: IEEE Transactions on Nuclear Science - IEEE
+      TRANS NUCL SCI 59 (June 2012), pp. 656–664. doi: 10.1109/TNS.2012.
+      2193597.
+[7]   Roland Diehl. Gamma-ray line measurements from supernova explosions. In:
+      Proceedings of the International Astronomical Union 12.S331 (Feb. 2017),
+      pp. 157–163. issn: 1743-9221. doi: 10.1017/s1743921317004343.
+[8]   Erik Dietz-laursonn. Detailed Studies of Light Transport in Optical Compon-
+      ents of Particle Detectors. PhD thesis. Aug. 2016.
+[9]   Winicjusz Drozdowski et al. CeBr Scintillator Development for Possible Use
+      in Space Missions. In: Nuclear Science, IEEE Transactions on 55 (July 2008),
+      pp. 1391–1396. doi: 10.1109/TNS.2007.908579.
+[10] Efficiency Calculations for Selected Scintillators. url: https : / / www .
+     crystals.saint-gobain.com/sites/imdf.crystals.com/files/documents/efficiency-
+     calculations.pdf.
+[11] Geant4 Book For Application Developers. url: http://geant4-userdoc.web.
+     cern.ch/geant4-userdoc/UsersGuides/ForApplicationDeveloper/html/index.
+     html.
+
+
+
+
+                                                                                 57
+[12] Geant4 Physics Reference Manual. url: http : / / cern . ch/ geant4 -
+     userdoc/UsersGuides/PhysicsReferenceManual/fo/PhysicsReferenceManual.
+     pdf.
+[13]   Aleksandar Gostojic et al. Characterization of LaBr3:Ce and CeBr3 calori-
+       meter modules for 3D imaging in gamma-ray astronomy. In: Nuclear Instru-
+       ments and Methods in Physics Research Section A Accelerators Spectromet-
+       ers Detectors and Associated Equipment 832 (Oct. 2016), pp. 24–42. doi:
+       10.1016/j.nima.2016.06.044.
+[14]   Claus Grupen and Irene Buvat, eds. Handbook of particle detection and ima-
+       ging, vol. 1 and vol.2. Berlin, Germany: Springer, 2012. doi: 10.1007/978-
+       3-642-13271-1.
+[15]   M. Kole et al. The POLAR gamma-ray burst polarization catalog. In: As-
+       tronomy & Astrophysics 644 (Dec. 2020), A124. issn: 1432-0746. doi: 10 .
+       1051/0004-6361/202037915.
+[16]   Merlin Kole. POLAR-2: The First Large Scale Gamma-ray Polarimeter. In:
+       PoS ICRC2019 (2020), p. 572. doi: 10.22323/1.358.0572.
+[17]   Claude Leroy and Pier-Giorgio Rancoita. Principles of Radiation Interac-
+       tion in Matter and Detection. 3rd. WORLD SCIENTIFIC, 2011. doi: 10 .
+       1142/8200.
+[18]   Klaus Lüders and Robert O. Pohl. Pohl’s Introduction to Physics. 1st ed.
+       Springer International Publishing, p. 634. isbn: 978-3-319-50269-4.
+[19]   Katherine Mesick et al. Elpasolite Planetary Ice and Composition Spectrometer
+       (EPICS): A Low-Resource Combined Gamma-Ray and Neutron Spectrometer
+       for Planetary Science. Jan. 2019.
+[20] Photon interaction with matter (in russian). url: http://nuclphys.sinp.
+     msu.ru/ihem/ihem03.htm.
+[21] Radiation Detection Materials. url: https://www.hellma.com/de/kristalline-
+     materialien/kristalle-zur-strahlungsdetektion/.
+[22]   Pawel Sibczynski et al. Characterization of some modern scintillators recom-
+       mended for use on large fusion facilities in g-ray spectroscopy and tomographic
+       measurements of g-emission profiles. In: Nukleonika 62 (Jan. 2017), p. 223. doi:
+       10.1515/nuka-2017-0032.
+[23]   R.W. Sloof. Luminescence Properties of NaI:Tl and CeBr3 with New Co-
+       dopants. Sept. 2016.
+[24] Tables of X-ray mass attenuation coefficients on the web-site of NIST. url:
+     https://physics.nist.gov/PhysRefData/XrayMassCoef/tab3.html.
+
+
+
+
+58
+[25]   Klaus Tadday. Scintillation Light Detection and Application of Silicon Pho-
+       tomultipliers in Imaging Calorimetry and Positron Emission Tomography. Jan.
+       2011.
+[26]   Alexei Ulyanov et al. Localisation of gamma-ray interaction points in thick
+       monolithic CeBr3 and LaBr3:Ce scintillators. In: Nuclear Instruments and
+       Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors
+       and Associated Equipment 844 (Nov. 2016). doi: 10.1016/j.nima.2016.11.
+       025.
+[27] Web-page about Compton scattering on Wikipedia. url: https : / / en .
+     wikipedia.org/wiki/Compton_scattering.
+[28] Web-page of SCIONIX. url: https : / / scionix . nl/ scintillation -
+     crystals/#tab-id-4.
+[29] Web-page of the BepiColombo mission. url: https : //www . cosmos . esa .
+     int/web/bepicolombo/mgns.
+[30] XCOM database. url: https://physics.nist.gov/cgi-bin/Xcom/xcom3_2.
+
+
+
+
+                                                                                 59
+
