@@ -35,7 +35,7 @@
 /opnovice2/detector/setDetectorWidth 51
 /opnovice2/detector/detectorHasReflector 1
 /opnovice2/detector/setReflectorType 0
-/opnovice2/detector/detectorHasHousing 0
+/opnovice2/detector/detectorHasHousing 1
 /opnovice2/detector/setNumberOfSiPM 1
 /opnovice2/detector/setDetectorMaterial 0
 
