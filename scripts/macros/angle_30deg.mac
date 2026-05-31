@@ -1,4 +1,11 @@
-### Energy sweep: 500 keV
+### Minimal single-inclination incidence macro
+### angle_deg=30
+### energy_keV=662
+### beam_on=10000
+### orientation: one angle in x-z plane, direction=(sin(theta), 0, cos(theta))
+### output: Ntuple 1 absorption only
+### source_z_mm=-9.0
+### aimed_front_z_mm=-8
 /tracking/verbose -1
 /process/verbose 0
 /run/verbose 0
@@ -11,9 +18,9 @@
 
 /analysis/setActivation 1
 /analysis/ntuple/setActivationToAll 0
+/analysis/ntuple/setActivation 1 1
 /analysis/h1/setActivationToAll 0
 /analysis/h2/setActivationToAll 0
-/analysis/ntuple/setActivation 0 1
 
 /opnovice2/detector/setDetectorSection 1
 /opnovice2/detector/setDetectorThickness 10
@@ -22,11 +29,13 @@
 /opnovice2/detector/detectorHasReflector 1
 /opnovice2/detector/setReflectorType 0
 /opnovice2/detector/detectorHasHousing 0
+/opnovice2/detector/setNumberOfSiPM 1
 /opnovice2/detector/setDetectorMaterial 0
 
-/gun/direction 0 0 1
+/gun/position 0 0 -0.9 cm
+/opnovice2/gun/gunAngleToZAxis 30 deg
 /gun/particle gamma
 /gun/polarization 0 0 0
-/gun/energy 500 keV
+/gun/energy 662 keV
 
-/run/beamOn 100
+/run/beamOn 10000

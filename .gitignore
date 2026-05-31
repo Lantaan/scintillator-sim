@@ -41,5 +41,4 @@ geant4.10.07.p02.tar.gz
 # Data files
 # exlude all files in data except .png, .md ... files
 /data/**/*.*
-!data/**/*.png
-!data/**/*.md
+!data/shared/*
