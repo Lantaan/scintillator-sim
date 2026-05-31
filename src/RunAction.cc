@@ -80,11 +80,10 @@ void RunAction::BeginOfRunAction(const G4Run* aRun)
     fRun->SetPrimary(particle, energy);
   }
 
-  //histograms
+  // Open even for ntuple-only runs. In Geant4 11.4, IsActive() only checks
+  // histogram/profile managers, so it is false when only ntuples are active.
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
-  if (analysisManager->IsActive()) {
-    analysisManager->OpenFile();
-  }
+  analysisManager->OpenFile();
 
   fTimer->Start();
 }
@@ -99,12 +98,10 @@ void RunAction::EndOfRunAction(const G4Run* aRun)
 
   if (isMaster) fRun->EndOfRun();
 
-  // save histograms
+  // Save histograms and ntuples.
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
-  if (analysisManager->IsActive()) {
-    analysisManager->Write();
-    analysisManager->CloseFile();
-  }
+  analysisManager->Write();
+  analysisManager->CloseFile();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

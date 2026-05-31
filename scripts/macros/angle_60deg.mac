@@ -17,8 +17,15 @@
 /process/em/deexcitationIgnoreCut 1
 
 /analysis/setActivation 1
-/analysis/ntuple/setActivationToAll 0
+/analysis/ntuple/setActivation 0 0
 /analysis/ntuple/setActivation 1 1
+/analysis/ntuple/setActivation 2 0
+/analysis/ntuple/setActivation 3 0
+/analysis/ntuple/setActivation 4 0
+/analysis/ntuple/setActivation 5 0
+/analysis/ntuple/setActivation 6 0
+/analysis/ntuple/setActivation 7 0
+/analysis/ntuple/setActivation 8 0
 /analysis/h1/setActivationToAll 0
 /analysis/h2/setActivationToAll 0
 

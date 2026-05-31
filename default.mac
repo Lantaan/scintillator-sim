@@ -23,7 +23,15 @@
 ### flags to enable output data. sometimes heavy performance impact!
 #
 /analysis/setActivation 1
-/analysis/ntuple/setActivationToAll 0
+/analysis/ntuple/setActivation 0 0
+/analysis/ntuple/setActivation 1 0
+/analysis/ntuple/setActivation 2 0
+/analysis/ntuple/setActivation 3 0
+/analysis/ntuple/setActivation 4 0
+/analysis/ntuple/setActivation 5 0
+/analysis/ntuple/setActivation 6 0
+/analysis/ntuple/setActivation 7 0
+/analysis/ntuple/setActivation 8 0
 /analysis/h1/setActivationToAll 0
 /analysis/h2/setActivationToAll 0
 
@@ -83,7 +91,8 @@
 
 # Add (1) or remove (0) reflector
 /opnovice2/detector/detectorHasReflector 1
-# type: 0-3. TODO what is what?
+# reflector type: 0=A diffuse wrap (no explicit air-gap), 1=B air-gap (specular then diffuse),
+# 2=C air-gap (specular/specular), 3=D rough diffuse (sigmaAlpha=0.6)
 /opnovice2/detector/setReflectorType 0
 
 # Add (1) or remove (0) Alu housing

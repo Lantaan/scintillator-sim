@@ -34,7 +34,7 @@ Related histogram CSVs (not ntuples):
 The analysis system is controlled in macro files (for example [`default.mac`](/D:/scintillator-sim/default.mac)):
 
 - `/analysis/setActivation 1` enables analysis output globally.
-- `/analysis/ntuple/setActivationToAll 0` disables all ntuples by default.
+- For Geant4 11.4.x, avoid `/analysis/ntuple/setActivationToAll 0`; use individual `/analysis/ntuple/setActivation <index> 0` commands instead.
 - `/analysis/ntuple/setActivation <index> 1` enables one ntuple by index.
 
 If an ntuple is not activated, it will not be written even if code fills it.
