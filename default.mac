@@ -111,6 +111,12 @@
 # shooting direction in XOZ in degrees
 /gun/direction 0 0 1
 
+# Beam profile type. Allowed values: point - delta distribution; disk - uniform disk profile in the plane perpendicular to beam direction; gauss - 2D Gaussian profile in the plane perpendicular to beam direction.
+/opnovice2/gun/beamType point
+
+# Beam profile size in mm. Meaning based on beam profile: point - ignored; disk - radius; gauss - half-width at half-maximum (HWHM).
+/opnovice2/gun/beamSize 0 mm
+
 # shouldn't be changed
 /gun/particle gamma
 

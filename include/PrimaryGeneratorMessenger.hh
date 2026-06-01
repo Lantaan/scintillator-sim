@@ -42,6 +42,7 @@
 class PrimaryGeneratorAction;
 class G4UIdirectory;
 class G4UIcmdWithADoubleAndUnit;
+class G4UIcmdWithAString;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -58,6 +59,8 @@ class PrimaryGeneratorMessenger: public G4UImessenger
     G4UIdirectory*                  fGunDir;
     G4UIcmdWithADoubleAndUnit*      fPolarCmd;
     G4UIcmdWithADoubleAndUnit*      SetGunAngle;
+    G4UIcmdWithAString*             SetBeamType;
+    G4UIcmdWithADoubleAndUnit*      SetBeamSize;
 
 };
 

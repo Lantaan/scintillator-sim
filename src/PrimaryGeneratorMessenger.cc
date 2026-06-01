@@ -35,6 +35,7 @@
 #include "PrimaryGeneratorAction.hh"
 #include "G4UIdirectory.hh"
 #include "G4UIcmdWithADoubleAndUnit.hh"
+#include "G4UIcmdWithAString.hh"
 #include "G4SystemOfUnits.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -66,6 +67,22 @@ PrimaryGeneratorMessenger::
   SetGunAngle->SetDefaultValue(0.0);
   SetGunAngle->SetDefaultUnit("deg");
   SetGunAngle->AvailableForStates(G4State_Idle, G4State_PreInit);
+
+  SetBeamType = new G4UIcmdWithAString("/opnovice2/gun/beamType", this);
+  SetBeamType->SetGuidance("Set beam profile type.");
+  SetBeamType->SetGuidance("Available values: point, disk, gauss.");
+  SetBeamType->SetParameterName("beam_type", false);
+  SetBeamType->AvailableForStates(G4State_Idle, G4State_PreInit);
+
+  SetBeamSize = new G4UIcmdWithADoubleAndUnit("/opnovice2/gun/beamSize", this);
+  SetBeamSize->SetGuidance("Set beam size in the plane perpendicular to the beam direction.");
+  SetBeamSize->SetGuidance("For beamType=disk, this is disk radius.");
+  SetBeamSize->SetGuidance("For beamType=gauss, this is Gaussian half-width at half maximum.");
+  SetBeamSize->SetParameterName("beam_size", false);
+  SetBeamSize->SetUnitCategory("Length");
+  SetBeamSize->SetDefaultValue(0.0);
+  SetBeamSize->SetDefaultUnit("mm");
+  SetBeamSize->AvailableForStates(G4State_Idle, G4State_PreInit);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -74,6 +91,8 @@ PrimaryGeneratorMessenger::~PrimaryGeneratorMessenger()
 {
   delete fPolarCmd;
   delete SetGunAngle;
+  delete SetBeamType;
+  delete SetBeamSize;
   delete fGunDir;
 }
 
@@ -95,6 +114,27 @@ void PrimaryGeneratorMessenger::SetNewValue(
     G4double dir_angle;
     dir_angle = SetGunAngle->GetNewDoubleValue(newValue);
     fPrimaryAction->SetGunAngleDir(dir_angle);
+  }
+  if (command == SetBeamType) {
+    if (newValue == "point") {
+      fPrimaryAction->SetBeamProfileType(PrimaryGeneratorAction::kBeamPoint);
+    }
+    else if (newValue == "disk") {
+      fPrimaryAction->SetBeamProfileType(PrimaryGeneratorAction::kBeamDisk);
+    }
+    else if (newValue == "gauss") {
+      fPrimaryAction->SetBeamProfileType(PrimaryGeneratorAction::kBeamGauss);
+    }
+    else {
+      G4ExceptionDescription ed;
+      ed << "Invalid beam type: " << newValue
+         << ". Available values are: point, disk, gauss.";
+      G4Exception("PrimaryGeneratorMessenger", "OpNovice2_005", FatalException, ed);
+    }
+  }
+  if (command == SetBeamSize) {
+    const G4double size = SetBeamSize->GetNewDoubleValue(newValue);
+    fPrimaryAction->SetBeamProfileSize(size);
   }
 }
 

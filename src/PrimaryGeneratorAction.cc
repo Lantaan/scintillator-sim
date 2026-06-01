@@ -37,6 +37,7 @@
 #include "DetectorConstruction.hh"
 #include <cmath>
 #include "Randomize.hh"
+#include "G4PhysicalConstants.hh"
 
 #include "G4Event.hh"
 #include "G4ParticleGun.hh"
@@ -48,7 +49,9 @@
 PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* detector)
  : G4VUserPrimaryGeneratorAction(),
    fParticleGun(nullptr),
-   fDetector(detector)
+   fDetector(detector),
+   fBeamProfileType(kBeamPoint),
+   fBeamProfileSize(0.0 * mm)
 {
   G4int n_particle = 1;
   fParticleGun = new G4ParticleGun(n_particle);
@@ -85,7 +88,17 @@ PrimaryGeneratorAction::~PrimaryGeneratorAction()
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
+  const G4ThreeVector basePosition = fParticleGun->GetParticlePosition();
+  const G4ThreeVector offset = SampleTransverseOffset();
+  if (offset.mag2() > 0.0) {
+    fParticleGun->SetParticlePosition(basePosition + offset);
+  }
+
   fParticleGun->GeneratePrimaryVertex(anEvent);
+
+  if (offset.mag2() > 0.0) {
+    fParticleGun->SetParticlePosition(basePosition);
+  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -94,6 +107,74 @@ void PrimaryGeneratorAction::SetGunAngleDir(G4double angle)
 {
   G4double x_dir = tan(angle);
   fParticleGun->SetParticleMomentumDirection(G4ThreeVector(x_dir, 0. ,1.));
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void PrimaryGeneratorAction::SetBeamProfileType(BeamProfileType type)
+{
+  fBeamProfileType = type;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void PrimaryGeneratorAction::SetBeamProfileSize(G4double size)
+{
+  fBeamProfileSize = (size >= 0.0) ? size : 0.0;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void PrimaryGeneratorAction::BuildTransverseBasis(const G4ThreeVector& direction,
+                                                   G4ThreeVector& e1,
+                                                   G4ThreeVector& e2) const
+{
+  G4ThreeVector dir = direction;
+  if (dir.mag2() <= 0.0) {
+    dir = G4ThreeVector(0.0, 0.0, 1.0);
+  }
+  dir = dir.unit();
+
+  G4ThreeVector helper = (std::fabs(dir.z()) < 0.9)
+    ? G4ThreeVector(0.0, 0.0, 1.0)
+    : G4ThreeVector(0.0, 1.0, 0.0);
+
+  e1 = dir.cross(helper);
+  if (e1.mag2() <= 0.0) {
+    helper = G4ThreeVector(1.0, 0.0, 0.0);
+    e1 = dir.cross(helper);
+  }
+  e1 = e1.unit();
+  e2 = dir.cross(e1).unit();
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+G4ThreeVector PrimaryGeneratorAction::SampleTransverseOffset() const
+{
+  if (fBeamProfileType == kBeamPoint || fBeamProfileSize <= 0.0) {
+    return G4ThreeVector();
+  }
+
+  G4double localX = 0.0;
+  G4double localY = 0.0;
+
+  if (fBeamProfileType == kBeamDisk) {
+    const G4double r = fBeamProfileSize * std::sqrt(G4UniformRand());
+    const G4double phi = twopi * G4UniformRand();
+    localX = r * std::cos(phi);
+    localY = r * std::sin(phi);
+  }
+  else if (fBeamProfileType == kBeamGauss) {
+    const G4double sigma = fBeamProfileSize / std::sqrt(2.0 * std::log(2.0));
+    localX = G4RandGauss::shoot(0.0, sigma);
+    localY = G4RandGauss::shoot(0.0, sigma);
+  }
+
+  G4ThreeVector e1;
+  G4ThreeVector e2;
+  BuildTransverseBasis(fParticleGun->GetParticleMomentumDirection(), e1, e2);
+  return localX * e1 + localY * e2;
 }
 
 

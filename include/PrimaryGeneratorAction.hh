@@ -38,6 +38,7 @@
 #include "G4ParticleGun.hh"
 #include "globals.hh"
 #include "DetectorConstruction.hh"
+#include "G4ThreeVector.hh"
 
 class G4Event;
 class PrimaryGeneratorMessenger;
@@ -47,6 +48,12 @@ class PrimaryGeneratorMessenger;
 class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
   public:
+    enum BeamProfileType {
+      kBeamPoint = 0,
+      kBeamDisk = 1,
+      kBeamGauss = 2
+    };
+
     PrimaryGeneratorAction(DetectorConstruction* );
     virtual ~PrimaryGeneratorAction();
 
@@ -57,11 +64,22 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     void SetOptPhotonPolar();
     void SetOptPhotonPolar(G4double);
     void SetGunAngleDir(G4double);
+    void SetBeamProfileType(BeamProfileType type);
+    void SetBeamProfileSize(G4double size);
+    BeamProfileType GetBeamProfileType() const { return fBeamProfileType; }
+    G4double GetBeamProfileSize() const { return fBeamProfileSize; }
 
   private:
+    G4ThreeVector SampleTransverseOffset() const;
+    void BuildTransverseBasis(const G4ThreeVector& direction,
+                              G4ThreeVector& e1,
+                              G4ThreeVector& e2) const;
+
     G4ParticleGun* fParticleGun;
     PrimaryGeneratorMessenger* fGunMessenger;
     DetectorConstruction* fDetector;
+    BeamProfileType fBeamProfileType;
+    G4double fBeamProfileSize;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
