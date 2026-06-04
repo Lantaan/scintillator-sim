@@ -108,7 +108,7 @@
 # gun position in cm. If not, 0.1 mm from front surface (scintillator, reflector or housing) on the Z axis is set by default.
 /gun/position 0 0 -0.9
 
-# shooting direction in XOZ in degrees
+# shooting direction in XYZ in degrees
 /gun/direction 0 0 1
 
 # Beam profile type. Allowed values: point - delta distribution; disk - uniform disk profile in the plane perpendicular to beam direction; gauss - 2D Gaussian profile in the plane perpendicular to beam direction.

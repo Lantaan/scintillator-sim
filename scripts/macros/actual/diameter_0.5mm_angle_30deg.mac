@@ -1,0 +1,51 @@
+### Minimal single-inclination incidence macro
+### angle_deg=30
+### energy_keV=662
+### beam_on=10000
+### orientation: one angle in x-z plane, direction=(sin(theta), 0, cos(theta))
+### output: Ntuple 1 absorption only
+### source_z_mm=-9.0
+### aimed_front_z_mm=-8
+/tracking/verbose -1
+/process/verbose 0
+/run/verbose 0
+/event/verbose 0
+/tracking/storeTrajectory 0
+
+/process/em/auger 1
+/process/em/augerCascade 1
+/process/em/deexcitationIgnoreCut 1
+
+/analysis/setActivation 1
+/analysis/ntuple/setActivation 0 0
+/analysis/ntuple/setActivation 1 1
+/analysis/ntuple/setActivation 2 0
+/analysis/ntuple/setActivation 3 0
+/analysis/ntuple/setActivation 4 0
+/analysis/ntuple/setActivation 5 0
+/analysis/ntuple/setActivation 6 0
+/analysis/ntuple/setActivation 7 0
+/analysis/ntuple/setActivation 8 0
+/analysis/h1/setActivationToAll 0
+/analysis/h2/setActivationToAll 0
+
+/opnovice2/detector/setDetectorSection 1
+/opnovice2/detector/setDetectorThickness 10
+/opnovice2/detector/setDetectorSideLength 51
+/opnovice2/detector/setDetectorWidth 51
+/opnovice2/detector/detectorHasReflector 1
+/opnovice2/detector/setReflectorType 0
+/opnovice2/detector/detectorHasHousing 1
+/opnovice2/detector/setNumberOfSiPM 1
+/opnovice2/detector/setDetectorMaterial 0
+
+/gun/position 0 0 -0.51 cm
+/opnovice2/gun/gunAngleToZAxis 30 deg
+/gun/particle gamma
+/gun/polarization 0 0 0
+/gun/energy 662 keV
+
+/opnovice2/gun/beamType disk
+/opnovice2/gun/beamSize 0.25 mm
+
+/run/beamOn 10000
