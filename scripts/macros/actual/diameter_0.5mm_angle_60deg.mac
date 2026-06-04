@@ -39,7 +39,7 @@
 /opnovice2/detector/setNumberOfSiPM 1
 /opnovice2/detector/setDetectorMaterial 0
 
-/gun/position 0 0 -0.51 cm
+/gun/position -0.692820323 0 -0.9 cm
 /opnovice2/gun/gunAngleToZAxis 60 deg
 /gun/particle gamma
 /gun/polarization 0 0 0
