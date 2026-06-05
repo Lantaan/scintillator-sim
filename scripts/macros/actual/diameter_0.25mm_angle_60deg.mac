@@ -46,6 +46,6 @@
 /gun/energy 662 keV
 
 /opnovice2/gun/beamType disk
-/opnovice2/gun/beamSize 0.25 mm
+/opnovice2/gun/beamSize 0.125 mm
 
 /run/beamOn 10000
