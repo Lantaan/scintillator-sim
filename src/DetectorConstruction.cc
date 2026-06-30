@@ -33,6 +33,7 @@
 
 #include <ActionInitialization.hh>
 #include <algorithm>
+#include <cstdlib>
 #include "DetectorConstruction.hh"
 #include "DetectorMessenger.hh"
 #include "DetectorMaterials.hh"
@@ -52,6 +53,15 @@
 #include "G4Version.hh"
 
 namespace {
+  G4double SpectrumYieldScale() {
+    const char* value = std::getenv("SCINTILLATOR_SIM_SPECTRUM_YIELD_SCALE");
+    if (value == nullptr) return 1.0;
+
+    char* end = nullptr;
+    const G4double scale = std::strtod(value, &end);
+    return end != value && *end == '\0' && scale > 0.0 ? scale : 1.0;
+  }
+
   void SetSplineIfSupported(G4MaterialPropertyVector *mpv) {
 #if G4VERSION_NUMBER < 1100
     if (mpv != nullptr) {
@@ -572,6 +582,7 @@ void DetectorConstruction::DefineMaterials() {
 }
 
 void DetectorConstruction::DefineOpticalProperties(G4int ScintillatorMaterial) {
+  const G4double spectrumYieldScale = SpectrumYieldScale();
   // Add scintillator optical properties
   if (ScintillatorMaterial==0) {
     // Add CeBr3 optical properties
@@ -579,7 +590,7 @@ void DetectorConstruction::DefineOpticalProperties(G4int ScintillatorMaterial) {
     fScintillatorMPT->AddProperty("RINDEX", PhotonEnergyCeBr3, rIndexCeBr3, nEntries);
     AddPropertyWithSpline(fScintillatorMPT, "ABSLENGTH", PhotonEnergyCeBr3, AbsorptionCeBr3, nEntries);
 
-    fScintillatorMPT->AddConstProperty("SCINTILLATIONYIELD", 60. / keV);
+    fScintillatorMPT->AddConstProperty("SCINTILLATIONYIELD", 60. * spectrumYieldScale / keV);
     fScintillatorMPT->AddConstProperty("RESOLUTIONSCALE", 1.0);
     fScintillatorMPT->AddConstProperty(ScintillationTimeConstantKey(), 18.0 * ns);
 #if G4VERSION_NUMBER >= 1100
@@ -601,7 +612,7 @@ void DetectorConstruction::DefineOpticalProperties(G4int ScintillatorMaterial) {
     fScintillatorMPT->AddProperty("RINDEX", PhotonEnergyCsI, rIndexCsI, nEntries);
     AddPropertyWithSpline(fScintillatorMPT, "ABSLENGTH", PhotonEnergyCsI, AbsorptionCsI, nEntries);
 
-    fScintillatorMPT->AddConstProperty("SCINTILLATIONYIELD", 54 / keV);
+    fScintillatorMPT->AddConstProperty("SCINTILLATIONYIELD", 54 * spectrumYieldScale / keV);
     fScintillatorMPT->AddConstProperty("RESOLUTIONSCALE", 1.0);
     fScintillatorMPT->AddConstProperty(ScintillationTimeConstantKey(), 0.6 * us);
     // fScintillatorMPT->AddConstProperty("SLOWTIMECONSTANT", 3.5 * mus);
@@ -621,7 +632,7 @@ void DetectorConstruction::DefineOpticalProperties(G4int ScintillatorMaterial) {
     fScintillatorMPT->AddProperty("RINDEX", PhotonEnergyNaI, rIndexNaI, nEntries);
     AddPropertyWithSpline(fScintillatorMPT, "ABSLENGTH", PhotonEnergyNaI, AbsorptionNaI, nEntries);
 
-    fScintillatorMPT->AddConstProperty("SCINTILLATIONYIELD", 38 / keV);
+    fScintillatorMPT->AddConstProperty("SCINTILLATIONYIELD", 38 * spectrumYieldScale / keV);
     fScintillatorMPT->AddConstProperty("RESOLUTIONSCALE", 1.0);
     fScintillatorMPT->AddConstProperty(ScintillationTimeConstantKey(), 250.0 * ns);
 #if G4VERSION_NUMBER >= 1100
@@ -834,6 +845,10 @@ void DetectorConstruction::AddHSiPM(G4VisAttributes* VisAtt_SiPM_log, G4LogicalV
 
     void DetectorConstruction::AddQSiPM(G4VisAttributes* VisAtt_SiPM_log, G4LogicalVolume* world_LV, G4int NumberOfSiPM,
                                         G4double ScintXSize, G4double ScintYSize, G4double ScintZSize, G4double SiPMThickness) {
+  if (NumberOfSiPM <= 0) {
+    return;
+  }
+
 
   auto *SiPMBoxXY
   = new G4Box("SiPM", ScintXSize, ScintYSize, SiPMThickness);

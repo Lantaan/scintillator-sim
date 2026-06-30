@@ -143,6 +143,8 @@ void HistoManager::Book()
   analysisManager->CreateNtupleFColumn(6, "pr_int_depth");
 	analysisManager->CreateNtupleIColumn(6, "interactionID");
   analysisManager->CreateNtupleFColumn(6, "energy_track");
+  analysisManager->CreateNtupleFColumn(6, "x");
+  analysisManager->CreateNtupleFColumn(6, "y");
 
   analysisManager->FinishNtuple(6);
 
@@ -161,5 +163,14 @@ void HistoManager::Book()
   analysisManager->CreateNtupleDColumn(8, "Ekin_0");
   analysisManager->CreateNtupleDColumn(8, "Ekin_1");
   analysisManager->FinishNtuple(8);
+
+  //Ntuple for detected scintillation photon positions.
+  analysisManager->CreateNtuple("det_scint_photon", "detected scintillation photon position");
+  analysisManager->CreateNtupleIColumn(9, "eventID");
+  analysisManager->CreateNtupleFColumn(9, "x");
+  analysisManager->CreateNtupleFColumn(9, "y");
+  analysisManager->CreateNtupleFColumn(9, "z");
+  analysisManager->FinishNtuple(9);
+  analysisManager->SetNtupleActivation(9, false);
 
 }

@@ -50,6 +50,8 @@
 
 #include "G4SystemOfUnits.hh"
 
+#include <cstdlib>
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 SteppingAction::SteppingAction(EventAction* EvAct, G4bool primary_int)
@@ -114,6 +116,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
         			       G4ThreeVector dir = endPoint->GetPosition();
         			       G4double x1 = dir.x();
         			       G4double y1 = dir.y();
+                     G4double z1 = dir.z();
         			       // fill histogram with absorption position (XY)            ****************************************************
                      analysisMan->FillH2(0, x1/mm, y1/mm);
                      // fill histogram with absorption position (R)            ****************************************************
@@ -130,6 +133,15 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
                 		 analysisMan->FillNtupleFColumn(1, 1, x1/mm);
                 		 analysisMan->FillNtupleFColumn(1, 2, y1/mm);
         			       analysisMan->AddNtupleRow(1);
+
+                     const G4VProcess* creator = track->GetCreatorProcess();
+                     if (creator && creator->GetProcessName() == "Scintillation") {
+                       analysisMan->FillNtupleIColumn(9, 0, eventID);
+                       analysisMan->FillNtupleFColumn(9, 1, x1/mm);
+                       analysisMan->FillNtupleFColumn(9, 2, y1/mm);
+                       analysisMan->FillNtupleFColumn(9, 3, z1/mm);
+                       analysisMan->AddNtupleRow(9);
+                     }
                 }
                 if (abs_spectrum){
 
@@ -305,6 +317,9 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
                    analysisMan->AddNtupleRow(2);
                 }
             }
+            if (std::getenv("SCINTILLATOR_SIM_EMISSION_ONLY") != nullptr) {
+              const_cast<G4Track*>(sec)->SetTrackStatus(fStopAndKill);
+            }
         }
     }
   }
@@ -320,6 +335,8 @@ void SteppingAction::GammaPrimaryInteraction(const G4Step* step, G4AnalysisManag
   G4StepPoint* start = step->GetPreStepPoint();
 
   G4ThreeVector vec = end->GetPosition();
+  G4double x2 	= vec.x();
+  G4double y2 	= vec.y();
   G4double z2 	= vec.z();
   G4Track* track = step->GetTrack();
   G4int trackID = track->GetTrackID();
@@ -330,6 +347,8 @@ void SteppingAction::GammaPrimaryInteraction(const G4Step* step, G4AnalysisManag
   aMan->FillNtupleIColumn(6, 0, evID);
   aMan->FillNtupleIColumn(6, 1, trackID);
   aMan->FillNtupleFColumn(6, 2, z2/mm);
+  aMan->FillNtupleFColumn(6, 5, x2/mm);
+  aMan->FillNtupleFColumn(6, 6, y2/mm);
 
   if (proc =="conv"){
     // track->SetTrackStatus(fKillTrackAndSecondaries);
@@ -371,6 +390,13 @@ void SteppingAction::GammaPrimaryInteraction(const G4Step* step, G4AnalysisManag
     //track->SetTrackStatus(fKillTrackAndSecondaries);
     run->AddPhot();
     aMan->FillNtupleIColumn(6, 3, 2);		//phot - 2
+    aMan->FillNtupleFColumn(6, 4, en_track/keV);
+    aMan->AddNtupleRow(6);
+  }
+
+  else if (proc == "Rayl"){
+    run->AddGammaRayleigh();
+    aMan->FillNtupleIColumn(6, 3, 3);		//Rayl - 3
     aMan->FillNtupleFColumn(6, 4, en_track/keV);
     aMan->AddNtupleRow(6);
   }
