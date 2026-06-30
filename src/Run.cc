@@ -49,6 +49,7 @@ Run::Run()
   fConv =0;
   fCompt =0;
   fPhot =0;
+  fGammaRayleigh =0;
 
   fOtherGammaInt=0;
 
@@ -95,7 +96,8 @@ void Run::Merge(const G4Run* run)
 
   fConv 	+=localRun->fConv;
   fCompt 	+=localRun->fCompt;
-  fPhot 	+=localRun->fPhot;
+  fPhot        +=localRun->fPhot;
+  fGammaRayleigh +=localRun->fGammaRayleigh;
 
   fOtherGammaInt  +=localRun->fOtherGammaInt;
 
@@ -136,6 +138,9 @@ void Run::EndOfRun()
 
   std::ios::fmtflags mode = G4cout.flags();
   G4int prec = G4cout.precision(2);
+  const auto percent = [](G4long numerator, G4long denominator) {
+    return denominator > 0 ? 100.0 * numerator / denominator : 0.0;
+  };
 
   G4cout << "\n    Run Summary\n";
   G4cout <<   "---------------------------------\n";
@@ -154,6 +159,9 @@ void Run::EndOfRun()
   if (fPhot>0){
 	G4cout << "Photoelectric effect: " << fPhot << G4endl;
   }
+  if (fGammaRayleigh>0){
+    G4cout << "Rayleigh scattering: " << fGammaRayleigh << G4endl;
+  }
 
   if (fOtherGammaInt>0){
 	G4cout << "others: " << fOtherGammaInt << G4endl;
@@ -170,22 +178,22 @@ void Run::EndOfRun()
   G4cout.precision(5);
   if (fScintCount > 0) {
     G4cout << "OpAbsorption:      " << fOpAbsorption << "                of total created, %: "
-           << fOpAbsorption * 100 / fScintCount << G4endl;
+           << percent(fOpAbsorption, fScintCount) << G4endl;
 
 
 // Photons absorbed in SiPM
     G4cout << "OpAbsorption in SiPM:      " << fSiPMOpAbsorption << "         of total absorbed, %: "
-           << fSiPMOpAbsorption * 100 / fOpAbsorption << G4endl;
+           << percent(fSiPMOpAbsorption, fOpAbsorption) << G4endl;
 
 // Photons absorbed in Scintillator
     G4cout << "OpAbsorption per event in Scintillator:      " << fScOpAbsorption << "         of total absorbed, %: "
-           << fScOpAbsorption * 100 / fOpAbsorption << G4endl;
+           << percent(fScOpAbsorption, fOpAbsorption) << G4endl;
 
 
     G4cout << "OpAbsorption before surface: " << std::setw(8)
            << fOpAbsorptionPrior << "                of total created, %: "
-           << fOpAbsorptionPrior * 100 / fScintCount << "                of total absorbed, %: "
-           << fOpAbsorptionPrior * 100 / fOpAbsorption << G4endl;
+           << percent(fOpAbsorptionPrior, fScintCount) << "                of total absorbed, %: "
+           << percent(fOpAbsorptionPrior, fOpAbsorption) << G4endl;
     G4cout << "OpAbsorption before surface in SiPM: " << std::setw(8)
            << fOpAbsorptionPriorSiPM << G4endl;
     G4cout << "OpAbsorption before surface in scintillator: " << std::setw(8)
@@ -193,7 +201,7 @@ void Run::EndOfRun()
 
     G4cout << "\nSurface events this run:" << G4endl;
     G4cout << "Total # of surface events:   " << std::setw(8) << fTotalSurface << "         of total created, %: "
-           << fTotalSurface * 100 / fScintCount << G4endl;
+           << percent(fTotalSurface, fScintCount) << G4endl;
 
     if (fParticle->GetParticleName() == "opticalphoton") {
       G4cout << "Unaccounted for:             " << std::setw(8)

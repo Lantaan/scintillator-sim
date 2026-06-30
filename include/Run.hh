@@ -53,6 +53,7 @@ class Run : public G4Run
     void AddConv(void) {fConv += 1;}
     void AddCompt(void) {fCompt += 1;}
     void AddPhot(void) {fPhot += 1;}
+    void AddGammaRayleigh(void) {fGammaRayleigh += 1;}
 
 
     void AddOtherGammaInt(void) {fOtherGammaInt +=1;}
@@ -163,6 +164,7 @@ class Run : public G4Run
     G4int fConv;
     G4int fCompt;
     G4int fPhot;
+    G4int fGammaRayleigh;
 
     G4int fOtherGammaInt;
 
