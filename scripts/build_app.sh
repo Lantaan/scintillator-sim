@@ -16,7 +16,7 @@ die() {
 [[ -f "${GEANT4_SH}" ]] || die "Missing Geant4 environment script: ${GEANT4_SH}"
 source "${GEANT4_SH}"
 
-GEANT4_CONFIG="$(find -L "${HOME}/geant-install" -name Geant4Config.cmake -print -quit)"
+GEANT4_CONFIG="$(find "${HOME}/geant-install" -name Geant4Config.cmake -print -quit)"
 [[ -n "${GEANT4_CONFIG}" ]] || die "Could not find Geant4Config.cmake under ${HOME}/geant-install"
 GEANT4_DIR="$(dirname "${GEANT4_CONFIG}")"
 
