@@ -1,0 +1,65 @@
+### Server macro: 662 keV, 0 deg, housing + reflector
+### Purpose: minimal ntuples for optical detector heatmaps by event type
+###          plus gamma Compton/Rayleigh/photoelectric history.
+###
+### Enabled ntuples:
+###   0  phot_count       event-level scintillation photon yield; small
+###   1  absorption       detected optical photon x/y with eventID; compact heatmaps
+###   6  pr_int           primary gamma interaction chain and positions
+###   8  scat_angles      Compton direction/energy before/after
+###   10 scint_source     scintillation creation source steps; compact and useful
+###
+### Disabled bulky/unneeded ntuples:
+###   2 scintillation spectrum, 3/7 depth summaries, 4 absorption spectrum,
+###   5 optical status, 9 detected photon x/y/z, 11 step energy deposition.
+###
+### Geometry/source:
+###   51 x 51 x 10 mm CeBr3, five-sided reflector type 0, aluminium housing
+###   source at z=-9 mm, crystal front face at z=-5 mm, point beam along +z
+
+/tracking/verbose -1
+/process/verbose 0
+/run/verbose 0
+/event/verbose 0
+/tracking/storeTrajectory 0
+
+/process/em/auger 1
+/process/em/augerCascade 1
+/process/em/deexcitationIgnoreCut 1
+
+/analysis/setActivation 1
+/analysis/ntuple/setActivation 0 1
+/analysis/ntuple/setActivation 1 1
+/analysis/ntuple/setActivation 2 0
+/analysis/ntuple/setActivation 3 0
+/analysis/ntuple/setActivation 4 0
+/analysis/ntuple/setActivation 5 0
+/analysis/ntuple/setActivation 6 1
+/analysis/ntuple/setActivation 7 0
+/analysis/ntuple/setActivation 8 1
+/analysis/ntuple/setActivation 9 0
+/analysis/ntuple/setActivation 10 1
+/analysis/ntuple/setActivation 11 0
+/analysis/h1/setActivationToAll 0
+/analysis/h2/setActivationToAll 0
+
+/opnovice2/detector/setDetectorSection 1
+/opnovice2/detector/setDetectorThickness 10
+/opnovice2/detector/setDetectorSideLength 51
+/opnovice2/detector/setDetectorWidth 51
+/opnovice2/detector/detectorHasReflector 1
+/opnovice2/detector/setReflectorType 0
+/opnovice2/detector/detectorHasHousing 1
+/opnovice2/detector/setNumberOfSiPM 1
+/opnovice2/detector/setDetectorMaterial 0
+
+/gun/position 0 0 -0.9 cm
+/opnovice2/gun/gunAngleToZAxis 0 deg
+/opnovice2/gun/beamType point
+/opnovice2/gun/beamSize 0 mm
+/gun/particle gamma
+/gun/polarization 0 0 0
+/gun/energy 662 keV
+
+### Edit this line on the server for the larger production run.
+/run/beamOn 20000
