@@ -270,6 +270,25 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 
   else { // particle != opticalphoton
 
+    const G4VPhysicalVolume* depositionVolume =
+        startPoint->GetPhysicalVolume();
+    const G4double depositedEnergy = step->GetTotalEnergyDeposit();
+    if (depositionVolume != nullptr && depositedEnergy > 0.0 &&
+        depositionVolume->GetName().find("Scintillator") == 0) {
+      const G4ThreeVector depositionPosition =
+          0.5 * (startPoint->GetPosition() + endPoint->GetPosition());
+      analysisMan->FillNtupleIColumn(11, 0, eventID);
+      analysisMan->FillNtupleIColumn(11, 1, track->GetTrackID());
+      analysisMan->FillNtupleIColumn(11, 2, track->GetParentID());
+      analysisMan->FillNtupleIColumn(
+          11, 3, track->GetParticleDefinition()->GetPDGEncoding());
+      analysisMan->FillNtupleDColumn(11, 4, depositionPosition.x() / mm);
+      analysisMan->FillNtupleDColumn(11, 5, depositionPosition.y() / mm);
+      analysisMan->FillNtupleDColumn(11, 6, depositionPosition.z() / mm);
+      analysisMan->FillNtupleDColumn(11, 7, depositedEnergy / keV);
+      analysisMan->AddNtupleRow(11);
+    }
+
 		if ((particleName == "gamma") and (fPrimaryInt)) {
 
 		    GammaPrimaryInteraction(step, analysisMan, eventID, run);
@@ -278,12 +297,16 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 
     const std::vector<const G4Track*>* secondaries =
                                 step->GetSecondaryInCurrentStep();
+    G4int scintillationSecondariesThisStep = 0;
+    G4ThreeVector scintillationPositionSum;
     for (auto sec : *secondaries) {
       	if (sec->GetDynamicParticle()->GetParticleDefinition() == opticalphoton){
             if (sec->GetCreatorProcess()
                     ->GetProcessName().compare("Scintillation") == 0) {
                 //		Counts scintillation photons in a run.
                 run->AddScintillation();
+                ++scintillationSecondariesThisStep;
+                scintillationPositionSum += sec->GetPosition();
 
 
                 if (scint_depth){
@@ -321,6 +344,17 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
               const_cast<G4Track*>(sec)->SetTrackStatus(fStopAndKill);
             }
         }
+    }
+    if (scintillationSecondariesThisStep > 0) {
+      const G4ThreeVector meanPosition =
+          scintillationPositionSum / scintillationSecondariesThisStep;
+      analysisMan->FillNtupleIColumn(10, 0, eventID);
+      analysisMan->FillNtupleIColumn(
+          10, 1, scintillationSecondariesThisStep);
+      analysisMan->FillNtupleFColumn(10, 2, meanPosition.x() / mm);
+      analysisMan->FillNtupleFColumn(10, 3, meanPosition.y() / mm);
+      analysisMan->FillNtupleFColumn(10, 4, meanPosition.z() / mm);
+      analysisMan->AddNtupleRow(10);
     }
   }
 

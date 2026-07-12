@@ -173,4 +173,30 @@ void HistoManager::Book()
   analysisManager->FinishNtuple(9);
   analysisManager->SetNtupleActivation(9, false);
 
+  // One row per non-optical step that creates scintillation photons.  The
+  // position is the mean of the actual Geant4 secondary creation positions,
+  // and the count is the exact step scintillation yield after quenching.
+  analysisManager->CreateNtuple("scint_source", "scintillation source step");
+  analysisManager->CreateNtupleIColumn(10, "eventID");
+  analysisManager->CreateNtupleIColumn(10, "created_photons");
+  analysisManager->CreateNtupleFColumn(10, "mean_x");
+  analysisManager->CreateNtupleFColumn(10, "mean_y");
+  analysisManager->CreateNtupleFColumn(10, "mean_z");
+  analysisManager->FinishNtuple(10);
+  analysisManager->SetNtupleActivation(10, false);
+
+  // One row per step with non-zero energy deposition in the scintillator.
+  // Coordinates are the midpoint of the Geant4 step and energy is in keV.
+  analysisManager->CreateNtuple("energy_deposition", "scintillator energy deposition step");
+  analysisManager->CreateNtupleIColumn(11, "eventID");
+  analysisManager->CreateNtupleIColumn(11, "trackID");
+  analysisManager->CreateNtupleIColumn(11, "parentID");
+  analysisManager->CreateNtupleIColumn(11, "pdgCode");
+  analysisManager->CreateNtupleDColumn(11, "x_mm");
+  analysisManager->CreateNtupleDColumn(11, "y_mm");
+  analysisManager->CreateNtupleDColumn(11, "z_mm");
+  analysisManager->CreateNtupleDColumn(11, "edep_keV");
+  analysisManager->FinishNtuple(11);
+  analysisManager->SetNtupleActivation(11, false);
+
 }
