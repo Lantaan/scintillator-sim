@@ -333,6 +333,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     else if (fScintillatorMaterial==2) {
         AddHScintillator(VisAtt_Scintillator_log, world_LV, fScintillatorLength, fScintillatorThickness, NaI_Tl);
       }
+    else if (fScintillatorMaterial==3) {
+        AddHScintillator(VisAtt_Scintillator_log, world_LV, fScintillatorLength, fScintillatorThickness, BGO);
+      }
     AddHSiPM(VisAtt_SiPM_log, world_LV, fScintillatorLength, fScintillatorThickness, fSiPM_z);
 
     if (fHasReflector) {
@@ -449,21 +452,25 @@ void DetectorConstruction::SetDetectorHasReflector(G4bool v) {
 void DetectorConstruction::SetScintillatorMaterial(G4int v){
   G4String material;
 
-  if (v>2) {
+  if (v < 0 || v > 3) {
     if (fScintillatorMaterial==0) {material ="CeBr3";}
     else if (fScintillatorMaterial==1) {material ="CsI(Tl)";}
     else if (fScintillatorMaterial==2) {material ="NaI(Tl)";}
+    else if (fScintillatorMaterial==3) {material ="BGO";}
 
-    G4cout << "Unknown material. " << fScintillatorMaterial << " still will be used." << G4endl;
-  }
-  else {
-    fScintillatorMaterial = v;
-    if (v==0) {material ="CeBr3";}
-    else if (v==1) {material ="CsI(Tl)";}
-    else if (v==2) {material ="NaI(Tl)";}
-    G4cout << material << " is used now in scintillator." << G4endl;
+    G4cout << "Unknown material id " << v << ". " << material << " still will be used." << G4endl;
+    return;
   }
 
+  fScintillatorMaterial = v;
+  if (v==0) {material ="CeBr3";}
+  else if (v==1) {material ="CsI(Tl)";}
+  else if (v==2) {material ="NaI(Tl)";}
+  else if (v==3) {material ="BGO";}
+  G4cout << material << " is used now in scintillator." << G4endl;
+
+  G4RunManager::GetRunManager()->ReinitializeGeometry();
+  G4RunManager::GetRunManager()->PhysicsHasBeenModified();
 }
 
 
@@ -572,6 +579,12 @@ void DetectorConstruction::DefineMaterials() {
   NaI_Tl->AddMaterial(NaI,99.6*perCent);
   NaI_Tl->AddElement(elTl,0.4*perCent);
 
+  // BGO (Bi4Ge3O12), undoped scintillator at room temperature
+  BGO = new G4Material("BGO", 7.13*g/cm3, 3, kStateSolid, 293.15*kelvin);
+  BGO->AddElement(elBi, 4);
+  BGO->AddElement(elGe, 3);
+  BGO->AddElement(elO, 12);
+
   // vacuum - tank, world
   Vacuum = new G4Material("Vacuum", z = 1., a = 1.008*g/mole, 1.e-25*g/cm3);
 
@@ -645,6 +658,25 @@ void DetectorConstruction::DefineOpticalProperties(G4int ScintillatorMaterial) {
     AddPropertyWithSpline(fReflectorMPT, "RINDEX", PhotonEnergyNaI, rIndex_ref, nEntries);
 
   }
+  else if (ScintillatorMaterial==3) {
+    // Add BGO optical properties
+    AddPropertyWithSpline(fScintillatorMPT, ScintillationComponentKey(), PhotonEnergyBGO, FastCompBGO, nEntries);
+    fScintillatorMPT->AddProperty("RINDEX", PhotonEnergyBGO, rIndexBGO, nEntries);
+    AddPropertyWithSpline(fScintillatorMPT, "ABSLENGTH", PhotonEnergyBGO, AbsorptionBGO, nEntries);
+
+    fScintillatorMPT->AddConstProperty("SCINTILLATIONYIELD", 8.5 * spectrumYieldScale / keV);
+    fScintillatorMPT->AddConstProperty("RESOLUTIONSCALE", 1.0);
+    fScintillatorMPT->AddConstProperty(ScintillationTimeConstantKey(), 317.0 * ns);
+#if G4VERSION_NUMBER >= 1100
+    fScintillatorMPT->AddConstProperty("SCINTILLATIONYIELD1", 1.0);
+#else
+    fScintillatorMPT->AddConstProperty("YIELDRATIO", 1.0);
+#endif
+
+    // Add reflector optical properties
+    AddPropertyWithSpline(fReflectorMPT, "RINDEX", PhotonEnergyBGO, rIndex_ref, nEntries);
+
+  }
 
 
 // Add SiPM optical properties
@@ -659,6 +691,10 @@ void DetectorConstruction::DefineOpticalProperties(G4int ScintillatorMaterial) {
   else if (ScintillatorMaterial==2) {
     fSiPMMPT->AddProperty("RINDEX", PhotonEnergyNaI, rIndexNaI, nEntries);
     fSiPMMPT->AddProperty("ABSLENGTH", PhotonEnergyNaI, Absorption_SiPM, nEntries);
+  }
+  else if (ScintillatorMaterial==3) {
+    fSiPMMPT->AddProperty("RINDEX", PhotonEnergyBGO, rIndexBGO, nEntries);
+    fSiPMMPT->AddProperty("ABSLENGTH", PhotonEnergyBGO, Absorption_SiPM, nEntries);
   }
 
 
@@ -677,6 +713,10 @@ void DetectorConstruction::DefineOpticalProperties(G4int ScintillatorMaterial) {
     fWorldMPT->AddProperty("RINDEX", PhotonEnergyNaI, rIndex_air, nEntries);
     fWorldMPT->AddProperty("ABSLENGTH", PhotonEnergyNaI, worldAbs, nEntries);
   }
+  else if (ScintillatorMaterial==3) {
+    fWorldMPT->AddProperty("RINDEX", PhotonEnergyBGO, rIndex_air, nEntries);
+    fWorldMPT->AddProperty("ABSLENGTH", PhotonEnergyBGO, worldAbs, nEntries);
+  }
 
   // ------------ Generate & Add Material Properties Table ------------
   Vacuum   ->SetMaterialPropertiesTable(fWorldMPT);
@@ -688,6 +728,9 @@ void DetectorConstruction::DefineOpticalProperties(G4int ScintillatorMaterial) {
   }
   else if (ScintillatorMaterial==2) {
     NaI_Tl->SetMaterialPropertiesTable(fScintillatorMPT);
+  }
+  else if (ScintillatorMaterial==3) {
+    BGO->SetMaterialPropertiesTable(fScintillatorMPT);
   }
 
   C2F4  ->SetMaterialPropertiesTable(fReflectorMPT);
@@ -1078,6 +1121,10 @@ void DetectorConstruction::AddQScintillator(G4VisAttributes* VisAtt_Scintillator
     Scintillator_log
             = new G4LogicalVolume(Scintillator_box, NaI_Tl, "Scintillator", 0, 0, 0);
   }
+  else if (ScintillatorMaterial ==3) {
+    Scintillator_log
+            = new G4LogicalVolume(Scintillator_box, BGO, "Scintillator", 0, 0, 0);
+  }
 
   // ************* Placement
   Scintillator_log->SetVisAttributes(VisAtt_Scintillator_log);
@@ -1140,6 +1187,10 @@ void DetectorConstruction::AddCScintillator(G4VisAttributes* VisAtt_Scintillator
     Scintillator_log
             = new G4LogicalVolume(Scintillator_tube, NaI_Tl, "Scintillator", 0, 0, 0);
   }
+  else if (ScintillatorMaterial ==3) {
+    Scintillator_log
+            = new G4LogicalVolume(Scintillator_tube, BGO, "Scintillator", 0, 0, 0);
+  }
  // ************* Placement
   Scintillator_log->SetVisAttributes(VisAtt_Scintillator_log);
 
@@ -1165,6 +1216,10 @@ void DetectorConstruction::ChooseReflector(G4int ReflectorType, G4OpticalSurface
   else if (ScintillatorMaterial ==2) {  //CsI
     std::copy(std::begin(PhotonEnergyNaI), std::end(PhotonEnergyNaI), PhotonEnergy);
     std::copy(std::begin(rIndexNaI), std::end(rIndexNaI), rIndex);
+  }
+  else if (ScintillatorMaterial ==3) {  //BGO
+    std::copy(std::begin(PhotonEnergyBGO), std::end(PhotonEnergyBGO), PhotonEnergy);
+    std::copy(std::begin(rIndexBGO), std::end(rIndexBGO), rIndex);
   }
 
   if (ReflectorType == 0) {

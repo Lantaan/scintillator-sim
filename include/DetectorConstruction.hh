@@ -60,7 +60,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         G4int ReflectorType=0,
         G4double ScintillatorSideLength=51 *mm,
         G4double ScintillatorRadius=25.5 *mm,
-        G4int ScintillatorMaterial=0, //CeBr3
+        G4int ScintillatorMaterial=0, // 0=CeBr3, 1=CsI(Tl), 2=NaI(Tl), 3=BGO
         G4double ScintillatorSideWidth=51 *mm,
         G4int NumberOfSiPM=1
     );

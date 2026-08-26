@@ -101,7 +101,7 @@
 # Select number of SiPMs. For quadratic section only. 1 - XY plane, 2 - XY and YZ planes, 3 - XY and 2 YZ planes.
 #/opnovice2/detector/setNumberOfSiPM 3
 
-# material of the crystal. Type 0 for CeBr3, 1 for CsI(Tl) or 2 for NaI(Tl).
+# material of the crystal. Type 0 for CeBr3, 1 for CsI(Tl), 2 for NaI(Tl), or 3 for BGO.
 /opnovice2/detector/setDetectorMaterial 0
 
 ### particle source configuration

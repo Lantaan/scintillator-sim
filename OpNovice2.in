@@ -69,7 +69,7 @@
 #/opnovice2/detector/setNumberOfSiPM 3
 
 # Set the material of the crystal:
-# 0 for CeBr3, 1 for CsI(Tl), 2 for NaI(Tl).
+# 0 for CeBr3, 1 for CsI(Tl), 2 for NaI(Tl), 3 for BGO.
 /opnovice2/detector/setDetectorMaterial 2
 
 # Set gun position in cm.

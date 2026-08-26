@@ -31,12 +31,16 @@ G4Element* elCs    = man->FindOrBuildElement("Cs");
 G4Element* elI    = man->FindOrBuildElement("I");
 G4Element* elTl    = man->FindOrBuildElement("Tl");
 G4Element* elNa    = man->FindOrBuildElement("Na");
+G4Element* elBi    = man->FindOrBuildElement("Bi");
+G4Element* elGe    = man->FindOrBuildElement("Ge");
+G4Element* elO     = man->FindOrBuildElement("O");
 
 G4Material* CeBr_3;
 G4Material* CsI;
 G4Material* CsI_Tl;
 G4Material* NaI;
 G4Material* NaI_Tl;
+G4Material* BGO;
 
 
 G4Material* Vacuum;
@@ -124,6 +128,38 @@ G4double AbsorptionNaI[nEntries] =   {429*mm, 429*mm, 429*mm, 429*mm,
                                       429*mm, 429*mm, 429*mm, 429*mm, 429*mm,
                                       429*mm, 429*mm, 429*mm, 429*mm, 429*mm, 429*mm};
 
+// BGO (Bi4Ge3O12) optical properties.
+// The emission shape is derived from the machine-readable BGO wavelength
+// distribution bundled with the UC Davis LUT Davis Model. The 1001 wavelengths
+// were converted to photon energy, binned on this grid, divided by bin width,
+// and normalized to a peak value of one.
+G4double PhotonEnergyBGO[nEntries] = {1.80 * eV, 1.90 * eV, 2.00 * eV, 2.10 * eV,
+                                      2.20 * eV, 2.30 * eV, 2.40 * eV, 2.50 * eV,
+                                      2.55 * eV, 2.60 * eV, 2.65 * eV, 2.70 * eV,
+                                      2.80 * eV, 2.90 * eV, 3.00 * eV, 3.10 * eV,
+                                      3.20 * eV, 3.30 * eV, 3.40 * eV, 3.50 * eV,
+                                      3.60 * eV, 3.70 * eV, 3.80 * eV, 3.90 * eV,
+                                      4.00 * eV};
+
+// Relative scintillation spectral density per unit photon energy.
+G4double FastCompBGO[nEntries] =     {0.000, 0.069, 0.277, 0.454,
+                                      0.662, 0.831, 0.962, 0.985, 1.000,
+                                      0.954, 0.908, 0.810, 0.662, 0.485,
+                                      0.292, 0.169, 0.062, 0.000, 0.000,
+                                      0.000, 0.000, 0.000, 0.000, 0.000, 0.000};
+
+G4double rIndexBGO[nEntries] =       {2.15, 2.15, 2.15, 2.15,
+                                      2.15, 2.15, 2.15, 2.15, 2.15,
+                                      2.15, 2.15, 2.15, 2.15, 2.15,
+                                      2.15, 2.15, 2.15, 2.15, 2.15,
+                                      2.15, 2.15, 2.15, 2.15, 2.15, 2.15};
+
+// Constant bulk optical absorption length adopted for the preliminary model.
+G4double AbsorptionBGO[nEntries] =   {4*m, 4*m, 4*m, 4*m,
+                                      4*m, 4*m, 4*m, 4*m, 4*m,
+                                      4*m, 4*m, 4*m, 4*m, 4*m,
+                                      4*m, 4*m, 4*m, 4*m, 4*m,
+                                      4*m, 4*m, 4*m, 4*m, 4*m, 4*m};
 
 // Reflector optical properties
 

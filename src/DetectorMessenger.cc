@@ -193,7 +193,9 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   fDetectorSetMaterialCmd =
           new G4UIcmdWithAnInteger ("/opnovice2/detector/setDetectorMaterial", this);
   fDetectorSetMaterialCmd->SetGuidance("Set the material of the crystal.");
-  fDetectorSetMaterialCmd->SetGuidance("Type 0 for CeBr3, 1 for CsI(Tl) or 2 for NaI(Tl)");
+  fDetectorSetMaterialCmd->SetGuidance("Type 0 for CeBr3, 1 for CsI(Tl), 2 for NaI(Tl), or 3 for BGO");
+  fDetectorSetMaterialCmd->SetParameterName("material", false);
+  fDetectorSetMaterialCmd->SetRange("material >= 0 && material <= 3");
   fDetectorSetMaterialCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
   fDetectorSetMaterialCmd->SetToBeBroadcasted(false);
 
