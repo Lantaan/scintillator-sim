@@ -1,0 +1,45 @@
+### Scattering-effects study: CeBr3, optical run with gamma scattering enabled
+### 51 x 51 x 10 mm crystal, five-sided reflector type 0, aluminium housing.
+### The enabled ntuples are the minimum needed for optical heatmaps,
+### event-classification, and Compton angle/energy analysis: 0, 1, 6, 8.
+
+/tracking/verbose -1
+/process/verbose 0
+/run/verbose 0
+/event/verbose 0
+/tracking/storeTrajectory 0
+
+/random/setSeeds 314159 271828
+
+/process/em/auger 1
+/process/em/augerCascade 1
+/process/em/deexcitationIgnoreCut 1
+
+/analysis/setActivation 1
+/analysis/ntuple/setActivationToAll 0
+/analysis/ntuple/setActivation 0 1
+/analysis/ntuple/setActivation 1 1
+/analysis/ntuple/setActivation 6 1
+/analysis/ntuple/setActivation 8 1
+/analysis/h1/setActivationToAll 0
+/analysis/h2/setActivationToAll 0
+
+/opnovice2/detector/setDetectorSection 1
+/opnovice2/detector/setDetectorThickness 10
+/opnovice2/detector/setDetectorSideLength 51
+/opnovice2/detector/setDetectorWidth 51
+/opnovice2/detector/detectorHasReflector 1
+/opnovice2/detector/setReflectorType 0
+/opnovice2/detector/detectorHasHousing 1
+/opnovice2/detector/setNumberOfSiPM 1
+/opnovice2/detector/setDetectorMaterial 0
+
+/gun/position 0 0 -0.9 cm
+/opnovice2/gun/gunAngleToZAxis 0 deg
+/opnovice2/gun/beamType point
+/opnovice2/gun/beamSize 0 mm
+/gun/particle gamma
+/gun/polarization 0 0 0
+/gun/energy 662 keV
+
+/run/beamOn 20000
